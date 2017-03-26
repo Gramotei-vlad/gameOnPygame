@@ -10,12 +10,12 @@ screen = pygame.display.set_mode((window_width, window_height), 0, 32)
 white = (255, 255, 255)
 green = (0, 255, 0)
 pygame.display.set_caption("Adventure")
-background_color = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Backgrounds\\colored_grass.png").convert_alpha()
+background_color = pygame.image.load("fon1.png").convert_alpha()
 
 # Дополнительные мелочи
 count_money = 0 # Счетчик собранных монет
 clock = pygame.time.Clock()
-sound_click = pygame.mixer.Sound("C:\\Game on Pygame\\Ui_music\\ui-sfx-set\\click3.wav")
+sound_click = pygame.mixer.Sound("click3.wav")
 
 
 # Создание спрайтов
@@ -25,7 +25,7 @@ class Hero(pygame.sprite.Sprite):
 
        pygame.sprite.Sprite.__init__(self)
 
-       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Players\\128x256\\Yellow\\alienYellow_front.png").convert_alpha()
+       self.image = pygame.image.load("Player.png").convert_alpha()
        self.image.set_colorkey(white)
 
 
@@ -90,7 +90,7 @@ class Ground(pygame.sprite.Sprite):
 
        pygame.sprite.Sprite.__init__(self)
 
-       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Ground\\Grass\\grassHalf_mid.png").convert_alpha()
+       self.image = pygame.image.load("grass.png").convert_alpha()
        self.image.set_colorkey(white)
 
 
@@ -115,7 +115,7 @@ class Money(pygame.sprite.Sprite):
 
        pygame.sprite.Sprite.__init__(self)
 
-       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Items\\coinBronze.png").convert_alpha()
+       self.image = pygame.image.load("coinBronze.png").convert_alpha()
        self.image.set_colorkey(white)
 
 
