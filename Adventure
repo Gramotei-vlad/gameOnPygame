@@ -1,0 +1,227 @@
+import pygame
+from pygame.locals import *
+
+
+pygame.init()
+# Создание окна игры
+window_width = 896
+window_height = 640
+screen = pygame.display.set_mode((window_width, window_height), 0, 32)
+white = (255, 255, 255)
+green = (0, 255, 0)
+pygame.display.set_caption("Adventure")
+background_color = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Backgrounds\\colored_grass.png").convert_alpha()
+
+# Дополнительные мелочи
+count_money = 0 # Счетчик собранных монет
+clock = pygame.time.Clock()
+sound_click = pygame.mixer.Sound("C:\\Game on Pygame\\Ui_music\\ui-sfx-set\\click3.wav")
+
+
+# Создание спрайтов
+class Hero(pygame.sprite.Sprite):
+
+    def __init__(self):
+
+       pygame.sprite.Sprite.__init__(self)
+
+       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Players\\128x256\\Yellow\\alienYellow_front.png").convert_alpha()
+       self.image.set_colorkey(white)
+
+
+       self.rect = self.image.get_rect()
+
+       # Расположение
+       self.rect.x = 20
+       self.rect.y = 314
+       self.onGround = True # Находимся на земле.
+
+    def update(self, left_move, right_move, up_move):
+        self.speed = 10
+        self.gravitation = 0.35
+        self.jump = 10
+
+        if self.rect.x == 0:
+            left_move = False
+
+        if left_move == True:
+            self.rect.x -= self.speed
+
+        elif right_move == True:
+            self.rect.x += self.speed
+
+        if self.onGround == True:
+            if up_move == True:
+                self.rect.y -= self.speed
+                self.onGround = False
+
+        if self.onGround == False:
+            self.rect.y += self.speed
+            self.onGround = True
+
+
+
+        """if up_move == True:
+            if self.onGround == True:
+                self.speed += self.jump
+                self.rect.y -= self.speed
+                self.onGround = False
+
+            elif self.onGround == False:
+                self.rect.y += self.speed
+
+        if up_move == False:
+            if self.onGround == False:
+                self.speed -= self.gravitation
+            if self.onGround == True:
+                self.speed = 0
+            self.rect.y += self.speed"""
+
+# Экземпляр игрока
+player = pygame.sprite.Group()
+yellow_hero = Hero()
+player.add(yellow_hero)
+left_move = right_move = up_move = False  # Кнопки не нажаты
+
+blocks = pygame.sprite.Group()
+
+class Ground(pygame.sprite.Sprite):
+    def __init__(self):
+
+       pygame.sprite.Sprite.__init__(self)
+
+       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Ground\\Grass\\grassHalf_mid.png").convert_alpha()
+       self.image.set_colorkey(white)
+
+
+       self.rect = self.image.get_rect()
+
+       # Расположение
+       self.rect.x = 0
+       self.rect.y = 570
+
+
+# Печатаем блок уровня!
+change_x = 0
+while change_x < 1397:
+    block_ground = Ground()
+    block_ground.rect.x = change_x
+    change_x += 127
+    blocks.add(block_ground)
+
+
+class Money(pygame.sprite.Sprite):
+    def __init__(self):
+
+       pygame.sprite.Sprite.__init__(self)
+
+       self.image = pygame.image.load("C:\\Game on Pygame\\Sprites_2\\platformer-pack-redux-360-assets\\PNG\\Items\\coinBronze.png").convert_alpha()
+       self.image.set_colorkey(white)
+
+
+       self.rect = self.image.get_rect()
+
+       self.rect.x = 400
+       self.rect.y = 460
+
+
+money = pygame.sprite.Group()
+money_bronze = Money()
+money.add(money_bronze)
+
+class Camera(object):
+    def __init__(self, camera_func, width_cam, height_cam):
+        self.camera_func = camera_func
+        self.state = Rect(0, 0, width_cam, height_cam)
+
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
+
+    def update(self, target):
+        self.state = self.camera_func(self.state, target.rect)
+
+def camera_configure(camera, target_rect):
+        l, t, _, _ = target_rect
+        _, _, w, h = camera
+        l = -l + window_width / 2
+        t = -t + window_height / 2
+
+        l = min(0, l)
+        l = max(-(camera.width - window_width), l)
+        t = max(-(camera.height - window_height), t)
+        t = min(0, t)
+        return Rect(l, t, w, h)
+
+total_level_width = 1300 # Ширина уровня
+total_level_height = 1300 # Высота уровня
+
+# Экземпляр динамической камеры
+camera = Camera(camera_configure, total_level_width, total_level_height)
+
+# Совокупность экземпляров
+entities = pygame.sprite.Group()
+entities.add(player)
+entities.add(blocks)
+entities.add(money)
+
+
+
+launch_of_game = True # Игра запущена!
+while launch_of_game:
+    # Собранные монеты
+    text_money = ("Money: " + str(count_money))
+    (x, y, fontsize) = (700, 50, 50)
+    myFont = pygame.font.SysFont("None", fontsize)
+    fontImage = myFont.render(text_money, 0, green)
+
+
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            launch_of_game = False
+
+        # Клавиши нажаты!
+        if event.type == KEYDOWN:
+            if event.key == K_ESCAPE:
+                launch_of_game = False
+        if event.type == MOUSEBUTTONDOWN:
+            if event.button == 1:
+                sound_click.play()
+        if event.type == KEYDOWN:
+            if event.key == K_RIGHT:
+                right_move = True
+            if event.key == K_LEFT:
+                left_move = True
+            if event.key == K_UP:
+                up_move = True
+
+        # Клавиши отпущены
+        if event.type == KEYUP:
+            if event.key == K_RIGHT:
+                right_move = False
+            if event.key == K_LEFT:
+                left_move = False
+            if event.key == K_UP:
+                up_move = False
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
+        if len(collisions) > 0:
+            count_money += 1
+
+        if yellow_hero.rect.y == 570:
+            yellow_hero.speed = 0
+            yellow_hero.onGround = True
+
+    screen.blit(background_color, (0,0))
+    screen.blit(fontImage, (x, y))
+    clock.tick(40)
+
+    # Рисуем персонажей!
+    for event in entities:
+        screen.blit(event.image, camera.apply(event))
+        camera.update(yellow_hero)
+
+
+    # Обновляем персонажей
+    player.update(left_move, right_move, up_move)
+    pygame.display.update()
+pygame.quit()
