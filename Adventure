@@ -7,8 +7,11 @@ pygame.init()
 window_width = 896
 window_height = 640
 screen = pygame.display.set_mode((window_width, window_height), 0, 32)
+
 white = (255, 255, 255)
 green = (0, 255, 0)
+red = (255, 0, 0)
+
 pygame.display.set_caption("Adventure")
 background_color = pygame.image.load("fon1.png").convert_alpha()
 
@@ -16,6 +19,8 @@ background_color = pygame.image.load("fon1.png").convert_alpha()
 count_money = 0 # Счетчик собранных монет
 clock = pygame.time.Clock()
 sound_click = pygame.mixer.Sound("click3.wav")
+wins_music = pygame.mixer.Sound("secosmic_lo.wav")
+hit_worm = pygame.mixer.Sound("punch.wav")
 
 
 # Создание спрайтов
@@ -31,18 +36,24 @@ class Hero(pygame.sprite.Sprite):
 
        self.rect = self.image.get_rect()
 
+       # Здоровье
+       self.health = 100
+
        # Расположение
        self.rect.x = 20
        self.rect.y = 314
        self.onGround = True # Находимся на земле.
 
-    def update(self, left_move, right_move, up_move):
+    def update(self, left_move, right_move, up_move, damage_mobs):
         self.speed = 10
         self.gravitation = 0.35
         self.jump = 10
 
         if self.rect.x == 0:
             left_move = False
+
+        if self.rect.x == 1180:
+            right_move = False
 
         if left_move == True:
             self.rect.x -= self.speed
@@ -59,29 +70,28 @@ class Hero(pygame.sprite.Sprite):
             self.rect.y += self.speed
             self.onGround = True
 
+        """if damage_mobs == True:
+            self.rect.x -= 20"""
+
+    def character(self):
+        if self.health < 0:
+            def __init__(self):
+                pygame.sprite.Sprite.__init__(self)
+
+                self.image = pygame.image.load("alienYellow_hit.png").convert_alpha()
+                self.image.set_colorkey(white)
 
 
-        """if up_move == True:
-            if self.onGround == True:
-                self.speed += self.jump
-                self.rect.y -= self.speed
-                self.onGround = False
+                self.rect = self.image.get_rect()
 
-            elif self.onGround == False:
-                self.rect.y += self.speed
 
-        if up_move == False:
-            if self.onGround == False:
-                self.speed -= self.gravitation
-            if self.onGround == True:
-                self.speed = 0
-            self.rect.y += self.speed"""
 
 # Экземпляр игрока
 player = pygame.sprite.Group()
 yellow_hero = Hero()
 player.add(yellow_hero)
 left_move = right_move = up_move = False  # Кнопки не нажаты
+damage_mobs = False # Нет урона от моба
 
 blocks = pygame.sprite.Group()
 
@@ -126,8 +136,60 @@ class Money(pygame.sprite.Sprite):
 
 
 money = pygame.sprite.Group()
-money_bronze = Money()
-money.add(money_bronze)
+change_x = 400
+while change_x <= 750:
+    money_bronze = Money()
+    money_bronze.rect.x = change_x
+    change_x += 150
+    money.add(money_bronze)
+
+class MoneyGold(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("coinGold.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 1200
+        self.rect.y = 460
+
+money_2 = pygame.sprite.Group()
+money_gold = MoneyGold()
+money_2.add(money_gold)
+
+class Enemies(pygame.sprite.Sprite):
+
+    def __init__(self):
+
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("wormGreen.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 1000
+        self.rect.y = 443
+        self.speed = 5
+
+    def update(self):
+
+        self.rect.x += self.speed
+
+        if self.rect.x < 600:
+            self.speed *= -1
+
+        if self.rect.x > 1001:
+            self.speed *= -1
+
+
+mobs = pygame.sprite.Group()
+worm = Enemies()
+mobs.add(worm)
+
 
 class Camera(object):
     def __init__(self, camera_func, width_cam, height_cam):
@@ -163,6 +225,8 @@ entities = pygame.sprite.Group()
 entities.add(player)
 entities.add(blocks)
 entities.add(money)
+entities.add(money_2)
+entities.add(mobs)
 
 
 
@@ -173,6 +237,30 @@ while launch_of_game:
     (x, y, fontsize) = (700, 50, 50)
     myFont = pygame.font.SysFont("None", fontsize)
     fontImage = myFont.render(text_money, 0, green)
+
+    health = ("Health: " + str(yellow_hero.health))
+    (x2, y2) = (700, 100)
+    fontImage2 = myFont.render(health, 0, green)
+
+    wins = ("Congratulations! You are take gold coin!")
+    (x3, y3, fontsize2) = (300, 300, 100)
+    myFont2 = pygame.font.SysFont("None", fontsize2)
+    fontImage3 = myFont2.render(wins, 0, red)
+
+    collisions = pygame.sprite.spritecollide(yellow_hero, mobs, False)
+    if len(collisions) > 0:
+        hit_worm.play()
+        damage_mobs = True
+
+    collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
+    if len(collisions) > 0:
+        count_money += 1
+
+    collisions = pygame.sprite.spritecollide(yellow_hero, money_2, True)
+    if len(collisions) > 0:
+        screen.blit(fontImage3, (x3, y3))
+        count_money += 3
+        wins_music.play()
 
 
     for event in pygame.event.get():
@@ -203,16 +291,11 @@ while launch_of_game:
             if event.key == K_UP:
                 up_move = False
 
-        collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
-        if len(collisions) > 0:
-            count_money += 1
-
-        if yellow_hero.rect.y == 570:
-            yellow_hero.speed = 0
-            yellow_hero.onGround = True
 
     screen.blit(background_color, (0,0))
     screen.blit(fontImage, (x, y))
+    screen.blit(fontImage2, (x2, y2))
+
     clock.tick(40)
 
     # Рисуем персонажей!
@@ -222,6 +305,7 @@ while launch_of_game:
 
 
     # Обновляем персонажей
-    player.update(left_move, right_move, up_move)
+    player.update(left_move, right_move, up_move, damage_mobs)
+    mobs.update()
     pygame.display.update()
 pygame.quit()
