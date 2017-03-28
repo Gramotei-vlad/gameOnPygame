@@ -1,5 +1,6 @@
 import pygame
 from pygame.locals import *
+import pyganim
 
 
 pygame.init()
@@ -72,17 +73,6 @@ class Hero(pygame.sprite.Sprite):
 
         """if damage_mobs == True:
             self.rect.x -= 20"""
-
-    def character(self):
-        if self.health < 0:
-            def __init__(self):
-                pygame.sprite.Sprite.__init__(self)
-
-                self.image = pygame.image.load("alienYellow_hit.png").convert_alpha()
-                self.image.set_colorkey(white)
-
-
-                self.rect = self.image.get_rect()
 
 
 
@@ -228,84 +218,107 @@ entities.add(money)
 entities.add(money_2)
 entities.add(mobs)
 
-
-
-launch_of_game = True # Игра запущена!
-while launch_of_game:
-    # Собранные монеты
-    text_money = ("Money: " + str(count_money))
-    (x, y, fontsize) = (700, 50, 50)
-    myFont = pygame.font.SysFont("None", fontsize)
-    fontImage = myFont.render(text_money, 0, green)
-
-    health = ("Health: " + str(yellow_hero.health))
-    (x2, y2) = (700, 100)
-    fontImage2 = myFont.render(health, 0, green)
-
-    wins = ("Congratulations! You are take gold coin!")
-    (x3, y3, fontsize2) = (300, 300, 100)
-    myFont2 = pygame.font.SysFont("None", fontsize2)
-    fontImage3 = myFont2.render(wins, 0, red)
-
-    collisions = pygame.sprite.spritecollide(yellow_hero, mobs, False)
-    if len(collisions) > 0:
-        hit_worm.play()
-        damage_mobs = True
-
-    collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
-    if len(collisions) > 0:
-        count_money += 1
-
-    collisions = pygame.sprite.spritecollide(yellow_hero, money_2, True)
-    if len(collisions) > 0:
-        screen.blit(fontImage3, (x3, y3))
-        count_money += 3
-        wins_music.play()
-
-
+"""def start():
     for event in pygame.event.get():
         if event.type == QUIT:
-            launch_of_game = False
+            pygame.quit()
+        elif event.type == KEYDOWN:
+            continue
+    return None
 
-        # Клавиши нажаты!
-        if event.type == KEYDOWN:
-            if event.key == K_ESCAPE:
+
+def Menu():
+    while start() == None:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+
+
+        pygame.display.update()
+
+    RunGame(count_money, left_move, right_move, up_move, damage_mobs)"""
+
+
+def RunGame(f_count_money, f_left_move, f_right_move, f_up_move, f_damage_mobs):
+    launch_of_game = True # Игра запущена!
+    while launch_of_game:
+        # Собранные монеты
+        text_money = ("Money: " + str(f_count_money))
+        (x, y, fontsize) = (700, 50, 50)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage = myFont.render(text_money, 0, green)
+
+        health = ("Health: " + str(yellow_hero.health))
+        (x2, y2) = (700, 100)
+        fontImage2 = myFont.render(health, 0, green)
+
+        wins = ("Congratulations! You are take gold coin!")
+        (x3, y3, fontsize2) = (300, 300, 100)
+        myFont2 = pygame.font.SysFont("None", fontsize2)
+        fontImage3 = myFont2.render(wins, 0, red)
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, mobs, False)
+        if len(collisions) > 0:
+            hit_worm.play()
+            # start()
+            f_damage_mobs = True
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
+        if len(collisions) > 0:
+            f_count_money += 1
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, money_2, True)
+        if len(collisions) > 0:
+            screen.blit(fontImage3, (x3, y3))
+            f_count_money += 3
+            wins_music.play()
+
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
                 launch_of_game = False
-        if event.type == MOUSEBUTTONDOWN:
-            if event.button == 1:
-                sound_click.play()
-        if event.type == KEYDOWN:
-            if event.key == K_RIGHT:
-                right_move = True
-            if event.key == K_LEFT:
-                left_move = True
-            if event.key == K_UP:
-                up_move = True
+
+            # Клавиши нажаты!
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    launch_of_game = False
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    sound_click.play()
+            if event.type == KEYDOWN:
+                if event.key == K_RIGHT:
+                    f_right_move = True
+                if event.key == K_LEFT:
+                    f_left_move = True
+                if event.key == K_UP:
+                    f_up_move = True
 
         # Клавиши отпущены
-        if event.type == KEYUP:
-            if event.key == K_RIGHT:
-                right_move = False
-            if event.key == K_LEFT:
-                left_move = False
-            if event.key == K_UP:
-                up_move = False
+            if event.type == KEYUP:
+                if event.key == K_RIGHT:
+                    f_right_move = False
+                if event.key == K_LEFT:
+                    f_left_move = False
+                if event.key == K_UP:
+                    f_up_move = False
 
 
-    screen.blit(background_color, (0,0))
-    screen.blit(fontImage, (x, y))
-    screen.blit(fontImage2, (x2, y2))
+        screen.blit(background_color, (0,0))
+        screen.blit(fontImage, (x, y))
+        screen.blit(fontImage2, (x2, y2))
 
-    clock.tick(40)
+        clock.tick(40)
 
     # Рисуем персонажей!
-    for event in entities:
-        screen.blit(event.image, camera.apply(event))
-        camera.update(yellow_hero)
+        for event in entities:
+            screen.blit(event.image, camera.apply(event))
+            camera.update(yellow_hero)
 
 
     # Обновляем персонажей
-    player.update(left_move, right_move, up_move, damage_mobs)
-    mobs.update()
-    pygame.display.update()
-pygame.quit()
+        player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
+        mobs.update()
+        pygame.display.update()
+    pygame.quit()
+
+RunGame(count_money, left_move, right_move, up_move, damage_mobs)
