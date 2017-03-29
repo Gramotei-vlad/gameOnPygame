@@ -13,15 +13,28 @@ white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
 
-pygame.display.set_caption("Adventure")
-background_color = pygame.image.load("fon1.png").convert_alpha()
 
-# Дополнительные мелочи
+pygame.display.set_caption("Adventure")
+
+# Изображения худа
+background_color = pygame.image.load("fon1.png").convert_alpha()
+hudCoin = pygame.image.load("hudCoin.png").convert_alpha()
+hudHealth = pygame.image.load("hudHeart_full.png").convert_alpha()
+# Изменяем размеры
+hudCoin_trans = pygame.transform.scale(hudCoin, (100, 100))
+hudHealth_trans = pygame.transform.scale(hudHealth, (100, 100))
+# Анимация
+Anim_right = [("alienYellow_walk1.png", 0.1)]
+Anim_stay = [("Player.png", 0.1)]
+Anim_hit = [("AlienYellow_hit.png", 0.1)]
+
+# Музыка и дополнительные мелочи
 count_money = 0 # Счетчик собранных монет
 clock = pygame.time.Clock()
 sound_click = pygame.mixer.Sound("click3.wav")
 wins_music = pygame.mixer.Sound("secosmic_lo.wav")
 hit_worm = pygame.mixer.Sound("punch.wav")
+
 
 
 # Создание спрайтов
@@ -45,6 +58,13 @@ class Hero(pygame.sprite.Sprite):
        self.rect.y = 314
        self.onGround = True # Находимся на земле.
 
+       # Загрузка анимации
+       self.AnimationRight = pyganim.PygAnimation(Anim_right)
+       self.AnimationStay = pyganim.PygAnimation(Anim_stay)
+       self.AnimationHit = pyganim.PygAnimation(Anim_hit)
+
+
+
     def update(self, left_move, right_move, up_move, damage_mobs):
         self.speed = 10
         self.gravitation = 0.35
@@ -56,24 +76,32 @@ class Hero(pygame.sprite.Sprite):
         if self.rect.x == 1180:
             right_move = False
 
-        if left_move == True:
+        if left_move is True:
             self.rect.x -= self.speed
 
-        elif right_move == True:
+        if right_move is True:
             self.rect.x += self.speed
+            # Проигрывание и зарисовка анимации
+            self.AnimationRight.play()
+            self.AnimationRight.blit(self.image, (0, 0))
 
-        if self.onGround == True:
+        if self.onGround is True:
             if up_move == True:
                 self.rect.y -= self.speed
                 self.onGround = False
 
-        if self.onGround == False:
+        if self.onGround is False:
             self.rect.y += self.speed
             self.onGround = True
 
-        """if damage_mobs == True:
-            self.rect.x -= 20"""
+        if not(right_move or left_move) is True and damage_mobs is False:
+            self.AnimationStay.play()
+            self.AnimationStay.blit(self.image, (0, 0))
 
+        if damage_mobs is True:
+            self.AnimationHit.play()
+            self.AnimationHit.blit(self.image, (0, 0))
+            self.rect.x -= 20
 
 
 # Экземпляр игрока
@@ -192,6 +220,7 @@ class Camera(object):
     def update(self, target):
         self.state = self.camera_func(self.state, target.rect)
 
+
 def camera_configure(camera, target_rect):
         l, t, _, _ = target_rect
         _, _, w, h = camera
@@ -236,20 +265,21 @@ def Menu():
 
         pygame.display.update()
 
-    RunGame(count_money, left_move, right_move, up_move, damage_mobs)"""
+    rungame(count_money, left_move, right_move, up_move, damage_mobs)"""
 
 
-def RunGame(f_count_money, f_left_move, f_right_move, f_up_move, f_damage_mobs):
+def rungame(f_count_money, f_left_move, f_right_move, f_up_move, f_damage_mobs):
     launch_of_game = True # Игра запущена!
     while launch_of_game:
         # Собранные монеты
-        text_money = ("Money: " + str(f_count_money))
-        (x, y, fontsize) = (700, 50, 50)
+        text_money = (str(f_count_money))
+        (x, y, fontsize) = (730, 50, 50)
         myFont = pygame.font.SysFont("None", fontsize)
         fontImage = myFont.render(text_money, 0, green)
 
-        health = ("Health: " + str(yellow_hero.health))
-        (x2, y2) = (700, 100)
+        health = (str(yellow_hero.health))
+        (x2, y2, fontsize) = (700, 150, 50)
+        myFont = pygame.font.SysFont("None", fontsize)
         fontImage2 = myFont.render(health, 0, green)
 
         wins = ("Congratulations! You are take gold coin!")
@@ -302,8 +332,9 @@ def RunGame(f_count_money, f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 if event.key == K_UP:
                     f_up_move = False
 
-
         screen.blit(background_color, (0,0))
+        screen.blit(hudCoin_trans, (750, 10))
+        screen.blit(hudHealth_trans, (750, 110))
         screen.blit(fontImage, (x, y))
         screen.blit(fontImage2, (x2, y2))
 
@@ -315,10 +346,11 @@ def RunGame(f_count_money, f_left_move, f_right_move, f_up_move, f_damage_mobs):
             camera.update(yellow_hero)
 
 
+
     # Обновляем персонажей
         player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
         mobs.update()
         pygame.display.update()
     pygame.quit()
 
-RunGame(count_money, left_move, right_move, up_move, damage_mobs)
+rungame(count_money, left_move, right_move, up_move, damage_mobs)
