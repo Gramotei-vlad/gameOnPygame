@@ -16,3 +16,5 @@ Added three bronze money;
 Increase level;
 Added main animation of moving.
 
+---
+I am work on a new update (0.13).
