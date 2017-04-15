@@ -11,8 +11,30 @@ You can pick up the coins while running;
 UPDATE 0.12
 Added enemy "pink worm";
 Added new icon of hud;
-Added possible to jump;
+Added ability to jump;
 Added three bronze money;
-Increase level;
+Increased level;
 Added main animation of moving.
 
+-----
+
+UPDATE 0.13
+Added enemy "mouse";
+Added enemy "fly";
+Added star;
+Added main menu;
+Added shop;
+Added ability to turn off sound;
+Added main music (turn on in menu);
+Added jump;
+Increased level;
+Added bomb;
+Added ability to kill your enemies;
+Added pause;
+Added new sounds;
+Added various inscriptions;
+Decreased icons of hud;
+Fixed many bugs;
+
+Music playing in the game :
+1 - Dom Smart - Create Ambient Adventure.
