@@ -10,6 +10,19 @@ window_width = 896
 window_height = 640
 flags = 0 # Оконный или полноэкранный режим
 screen = pygame.display.set_mode((window_width, window_height), flags, 32)
+
+
+def toggle_screen():
+
+    flags = FULLSCREEN
+    screen = pygame.display.set_mode((window_width, window_height), flags, 32)
+
+
+def toggle_fullscreen():
+    flags = 0
+    screen = pygame.display.set_mode((window_width, window_height), flags, 32)
+
+
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
@@ -22,6 +35,7 @@ pygame.display.set_caption("Adventure")
 # Изображения худа
 background_color = pygame.image.load("fon1.png").convert_alpha()
 button_menu = pygame.image.load("buttonStart.png").convert_alpha()
+button_select = pygame.image.load("buttonSelect.png").convert_alpha()
 hudCoin = pygame.image.load("hudCoin.png").convert_alpha()
 hudHealth = pygame.image.load("hudHeart_full.png").convert_alpha()
 hudHealthHalf = pygame.image.load("hudHeart_half.png").convert_alpha()
@@ -50,6 +64,8 @@ hudLockedPlayer = pygame.image.load("Locked.png").convert_alpha()
 hudCheckMark = pygame.image.load("checkmark.png").convert_alpha()
 hudSettings = pygame.image.load("gear.png").convert_alpha()
 hudPlus = pygame.image.load("plus.png").convert_alpha()
+hudLevel = pygame.image.load("Level.png").convert_alpha()
+hudNumber1 = pygame.image.load("hud1.png").convert_alpha()
 
 # Изменяем размеры
 hudCoin_trans = pygame.transform.scale(hudCoin, (70, 70))
@@ -147,6 +163,15 @@ coin_y = 15
 
 coin_x_2 = 380
 coin_y_2 = 380
+
+level_x = 0
+level_y = 0
+
+number_1_x = 0
+number_1_y = 100
+
+select_x = 400
+select_y = 360
 
 game_go = False # Уровень не запущен
 clock = pygame.time.Clock()
@@ -431,6 +456,7 @@ sprung = pygame.sprite.Group()
 jump_off = Jump()
 sprung.add(jump_off)"""
 
+
 class Bomb(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -471,14 +497,13 @@ class Fly(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.image.load("fly.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (100, 100))
         self.image.set_colorkey(white)
 
 
         self.rect = self.image.get_rect()
 
         self.rect.x = 2000
-        self.rect.y = 200
+        self.rect.y = 100
 
         self.speed = 12
 
@@ -501,15 +526,16 @@ class FireBall(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.image.load("fireball.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (100, 100))
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
+        self.rect.x = fly.rect.x
+        self.rect.y = fly.rect.y
         self.speed = 15
 
     def update(self):
         self.rect.y += self.speed
+
 
 
 particles = pygame.sprite.Group()
@@ -576,6 +602,7 @@ class Mouse_2(pygame.sprite.Sprite):
 mouse_2 = Mouse_2()
 mobs_worm.add(mouse_2)
 
+
 class Exit(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -591,6 +618,7 @@ class Exit(pygame.sprite.Sprite):
 table = pygame.sprite.Group()
 exit_level = Exit()
 table.add(exit_level)
+
 
 class Camera(object):
     def __init__(self, camera_func, width_cam, height_cam):
@@ -617,7 +645,7 @@ def camera_configure(camera, target_rect):
         return Rect(l, t, w, h)
 
 total_level_width = 4000 # Ширина уровня
-total_level_height = 1300 # Высота уровня
+total_level_height = 1000 # Высота уровня
 
 # Экземпляр динамической камеры
 camera = Camera(camera_configure, total_level_width, total_level_height)
@@ -632,6 +660,7 @@ entities.add(mobs_fly)
 entities.add(money_wins)
 entities.add(wins)
 entities.add(table)
+
 
 
 def music_player():
@@ -822,6 +851,10 @@ def menu(f_game_go):
                 if event.button == 1 and crossing_3 is True:
                     if audio_On is True:
                         switch_1.play()
+                    if fullScreen == False:
+                        toggle_screen()
+                    else:
+                        toggle_fullscreen()
                     fullScreen = not fullScreen
 
                 if event.button == 1 and crossing_4 is True and menu_load is False:
@@ -861,7 +894,7 @@ def menu(f_game_go):
                         switch_1.play()
                     settings = False
 
-                if event.button == 1 and crossing_12 == True and shop_load is True and shop_tools is False:
+                if event.button == 1 and crossing_12 is True and shop_load is True and shop_tools is False:
                     if audio_On is True:
                         switch_1.play()
                     shop_character = True
@@ -881,9 +914,11 @@ def menu(f_game_go):
         screen.blit(background_color, (0, 0))
         screen.blit(hudCoin_trans, (coin_x, coin_y))
         screen.blit(fontImage, (x, y))
+        screen.blit(hudLevel, (level_x, level_y))
 
         if menu_load is False:
             screen.blit(button_menu, (start_x, start_y))
+            screen.blit(button_select, (select_x, select_y))
 
         if settings is True:
             if fullScreen is True:
@@ -1152,6 +1187,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         if len(collisions) > 0:
             game_wins()
 
+        collisions = pygame.sprite.spritecollide(yellow_hero, particles, True)
+        if len(collisions) > 0:
+            yellow_hero.health -= 10
+
+
         # Взаимодействие с кнопками
         for x_3 in range(pause_x, pause_x + 30):
             for y_3 in range(pause_y, pause_y + 30):
@@ -1166,8 +1206,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 entities.add(particles)
                 fire.rect.x = fly.rect.x
                 fire.rect.y = fly.rect.y
-                if fire.rect.x == yellow_hero.rect.x and fire.rect.y == yellow_hero.rect.y:
-                    yellow_hero.health -= 10
+
 
         for event in pygame.event.get():
             if event.type == QUIT:
