@@ -38,3 +38,10 @@ Fixed many bugs;
 
 Music playing in the game :
 1 - Dom Smart - Create Ambient Adventure.
+
+-----
+
+UPDATE 0.13b
+Added icon of characters in menu;
+Added ability to switch fullscreen/window mode;
+Fixed bugs which "fly" not attacked you.
