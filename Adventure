@@ -2,18 +2,17 @@ import pygame
 from pygame.locals import *
 import pyganim
 import pyglet
-
+import sys
 
 pygame.init()
 # Создание окна игры
 window_width = 896
 window_height = 640
-flags = 0 # Оконный или полноэкранный режим
+flags = 0  # Оконный или полноэкранный режим
 screen = pygame.display.set_mode((window_width, window_height), flags, 32)
 
 
 def toggle_screen():
-
     flags = FULLSCREEN
     screen = pygame.display.set_mode((window_width, window_height), flags, 32)
 
@@ -26,11 +25,9 @@ def toggle_fullscreen():
 white = (255, 255, 255)
 green = (0, 255, 0)
 red = (255, 0, 0)
-
-
+blue = (0, 0, 255)
 
 pygame.display.set_caption("Adventure")
-
 
 # Изображения худа
 background_color = pygame.image.load("fon1.png").convert_alpha()
@@ -48,7 +45,7 @@ hudAudio = pygame.image.load("audioOn.png").convert_alpha()
 hudAudioOff = pygame.image.load("audioOff.png").convert_alpha()
 hudFullcreen = pygame.image.load("larger.png").convert_alpha()
 hudMenu = pygame.image.load("menuList.png").convert_alpha()
-hudShop = pygame.image.load("basket.png").convert_alpha()
+hudShop = pygame.image.load("cart.png").convert_alpha()
 hudWindow = pygame.image.load("smaller.png").convert_alpha()
 hudTrophy = pygame.image.load("trophy (2).png").convert_alpha()
 hudQuit = pygame.image.load("power.png").convert_alpha()
@@ -66,6 +63,14 @@ hudSettings = pygame.image.load("gear.png").convert_alpha()
 hudPlus = pygame.image.load("plus.png").convert_alpha()
 hudLevel = pygame.image.load("Level.png").convert_alpha()
 hudNumber1 = pygame.image.load("hud1.png").convert_alpha()
+hudNumber2 = pygame.image.load("hud2.png").convert_alpha()
+hudQuitX = pygame.image.load("hudX.png").convert_alpha()
+hudDoor = pygame.image.load("door.png").convert_alpha()
+hudSave = pygame.image.load("save.png").convert_alpha()
+hudSave_2 = pygame.image.load("save (2).png").convert_alpha()
+hudStar = pygame.image.load("star.png").convert_alpha()
+hudYellowKeyEmpty = pygame.image.load("hudKey_yellow_empty.png").convert_alpha()
+hudYellowKey = pygame.image.load("hudKey_yellow.png").convert_alpha()
 
 # Изменяем размеры
 hudCoin_trans = pygame.transform.scale(hudCoin, (70, 70))
@@ -74,7 +79,7 @@ hudHealthHalf_trans = pygame.transform.scale(hudHealthHalf, (70, 70))
 hudHealthEmpty_trans = pygame.transform.scale(hudHealthEmpty, (70, 70))
 hudBomb_trans = pygame.transform.scale(hudBomb, (70, 70))
 hudBombNo_trans = pygame.transform.scale(hudBombNo, (70, 70))
-
+hudStar_trans = pygame.transform.scale(hudStar, (100, 100))
 
 # Анимация
 Anim_right = [("alienYellow_walk1.png", 0.1)]
@@ -82,7 +87,17 @@ Anim_stay = [("Player.png", 0.1)]
 Anim_jump = [("alienYellow_jump.png", 0.1)]
 Anim_hit = [("AlienYellow_hit.png", 1.0)]
 
+Anim_beige_right = [("alienBeige_walk1.png", 0.1)]
+
 Anim_worm_dead = [("wormGreen_dead.png", 0.1)]
+Anim_wormPink_dead = [("wormPink_dead.png", 0.1)]
+Anim_mouse_dead = [("mouse_dead.png", 0.1)]
+Anim_bee_dead = [("bee_dead.png", 0.1)]
+Anim_worm_move = [("wormGreen.png", 0.1), ("wormGreen_move.png", 0.1)]
+Anim_worm_pink = [("wormPink.png", 0.1), ("wormPink_move.png", 0.1)]
+Anim_fly = [("fly.png", 0.1), ("fly_move.png", 0.1)]
+Anim_mouse = [("mouse.png", 0.1), ("mouse_move.png", 0.1)]
+Anim_bee = [("bee.png", 0.1), ("bee_move.png", 0.1)]
 
 # Музыка и дополнительные мелочи
 
@@ -120,7 +135,7 @@ music_x = 730
 music_y = 570
 
 return_x = 830
-return_y = 140
+return_y = 180
 
 return_x_2 = 685
 return_y_2 = 570
@@ -167,13 +182,28 @@ coin_y_2 = 380
 level_x = 0
 level_y = 0
 
-number_1_x = 0
-number_1_y = 100
+number_1_x = 200
+number_1_y = 200
+
+number_2_x = 290
+number_2_y = 200
 
 select_x = 400
 select_y = 360
 
-game_go = False # Уровень не запущен
+quitX_x = 380
+quitX_y = 200
+
+door_x = 400
+door_y = 200
+
+save_x = 400
+save_y = 250
+
+save_2_x = 830
+save_2_y = 143
+
+game_go = False  # Уровень не запущен
 clock = pygame.time.Clock()
 pygame.time.delay(3000)
 
@@ -185,58 +215,69 @@ handleCoins = pygame.mixer.Sound("handleCoins.ogg")
 explosion = pygame.mixer.Sound("boom.wav")
 switch_1 = pygame.mixer.Sound("switch1.wav")
 switch_button = pygame.mixer.Sound("switch10.wav")
+#box_open = pygame.mixer.Sound("openBox.wav")
 
+main_music = pyglet.media.Player() # Плеер
+music_1 = pyglet.media.load("Adventure.mp3") # Заглавная музыка 1
+main_music.queue(music_1) # Добавление в плеер и ожидание запуска
+
+fon_music = pyglet.media.Player()
+bee_music = pyglet.media.load("Sound bee.mp3")
+fon_music.queue(bee_music)
+
+box_open = pyglet.media.Player()
+open_crate = pyglet.media.load("openBox.wav")
+box_open.queue(open_crate)
 
 
 # Создание спрайтов
 class Hero(pygame.sprite.Sprite):
-
     def __init__(self):
 
-       pygame.sprite.Sprite.__init__(self)
+        pygame.sprite.Sprite.__init__(self)
 
-       self.image = pygame.image.load("Player.png").convert_alpha()
-       self.image.set_colorkey(white)
+        self.image = pygame.image.load("Player.png").convert_alpha()
+        self.image.set_colorkey(white)
 
+        self.rect = self.image.get_rect()
 
-       self.rect = self.image.get_rect()
+        # Здоровье
+        self.health = 100
 
-       # Здоровье
-       self.health = 100
+        # Характеристики персонажа
+        self.speed = 10
+        self.jump = 250
+        self.drop = 50
 
-       # Характеристики персонажа
-       self.speed = 10
-       self.jump = 250
-       self.drop = 50
+        # Инвентарь
+        self.count_money = 0
+        self.amount_bomb = 3
+        self.star = 0
 
-       # Инвентарь
-       self.count_money = 0
-       self.amount_bomb = 2
+        # Расположение
+        self.rect.x = 20
+        self.rect.y = 314
+        self.onGround = True  # Находимся на земле.
 
-       # Расположение
-       self.rect.x = 20
-       self.rect.y = 314
-       self.onGround = True # Находимся на земле.
-
-
-       # Загрузка анимации
-       self.AnimationRight = pyganim.PygAnimation(Anim_right)
-       self.AnimationStay = pyganim.PygAnimation(Anim_stay)
-       self.AnimationHit = pyganim.PygAnimation(Anim_hit)
-       self.AnimationJump = pyganim.PygAnimation(Anim_jump)
-
-
+        # Загрузка анимации
+        self.AnimationRight = pyganim.PygAnimation(Anim_right)
+        self.AnimationStay = pyganim.PygAnimation(Anim_stay)
+        self.AnimationHit = pyganim.PygAnimation(Anim_hit)
+        self.AnimationJump = pyganim.PygAnimation(Anim_jump)
 
     def update(self, left_move, right_move, up_move, damage_mobs):
 
         if self.rect.x == 0:
             left_move = False
 
-        if self.rect.x == 3880:
+        if self.rect.x == 3880 and level_1 is True:
+            right_move = False
+
+        if self.rect.x == 880 and level_2 is True:
             right_move = False
 
         if left_move is True:
-            #pygame.time.delay(20)
+            # pygame.time.delay(20)
             if audio_On is True and self.onGround is True:
                 sound_step.play()
             self.rect.x -= self.speed
@@ -246,25 +287,15 @@ class Hero(pygame.sprite.Sprite):
             # Проигрывание и зарисовка анимации
             self.AnimationRight.play()
             self.AnimationRight.blit(self.image, (0, 0))
-            #pygame.time.delay(20) # Задержака перед воспроизведением звука
+            # pygame.time.delay(20) # Задержака перед воспроизведением звука
             if audio_On is True and self.onGround is True:
                 sound_step.play()
 
-        """if self.onGround is True and up_move is True:
-            self.rect.y -= self.jump
+        if self.onGround is False:
             self.AnimationJump.play()
             self.AnimationJump.blit(self.image, (0, 0))
-            self.onGround = False
 
-        elif self.onGround is False and (up_move is True or up_move is False):
-            self.rect.y += self.jump
-            self.onGround = True"""
-
-        if damage_mobs is True:
-            self.AnimationHit.play()
-            self.AnimationHit.blit(self.image, (0, 0))
-
-        if not(right_move or left_move) is True and damage_mobs is False and up_move is False:
+        if not (right_move or left_move) is True and up_move is False:
             self.AnimationStay.play()
             self.AnimationStay.blit(self.image, (0, 0))
 
@@ -274,25 +305,49 @@ player = pygame.sprite.Group()
 yellow_hero = Hero()
 player.add(yellow_hero)
 left_move = right_move = up_move = False  # Кнопки не нажаты
-damage_mobs = False # Нет урона от моба
-onGround = True # Мы на земле
+damage_mobs = False  # Нет урона от моба
+onGround = True  # Мы на земле
+
+
+class HeroTwo(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("Beige player.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.speed = 5
+
+        # Анимация
+        self.Animation_right = pyganim.PygAnimation(Anim_beige_right)
+
+    def update(self):
+
+        self.rect.x += self.speed
+        self.Animation_right.play()
+        self.Animation_right.blit(self.image, (0, 0))
+
+AI_player = pygame.sprite.Group()
+beige_player = HeroTwo()
+AI_player.add(beige_player)
 
 blocks = pygame.sprite.Group()
 
+
 class Ground(pygame.sprite.Sprite):
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
 
-       pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("grass.png").convert_alpha()
+        self.image.set_colorkey(white)
 
-       self.image = pygame.image.load("grass.png").convert_alpha()
-       self.image.set_colorkey(white)
+        self.rect = self.image.get_rect()
 
-
-       self.rect = self.image.get_rect()
-
-       # Расположение
-       self.rect.x = 0
-       self.rect.y = 570
+        # Расположение
+        self.rect.x = 0
+        self.rect.y = 570
 
 
 # Печатаем блок уровня!
@@ -315,23 +370,24 @@ while change_x < 3900:
 
 class Money(pygame.sprite.Sprite):
     def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
 
-       pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("coinBronze.png").convert_alpha()
+        self.image.set_colorkey(white)
 
-       self.image = pygame.image.load("coinBronze.png").convert_alpha()
-       self.image.set_colorkey(white)
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 400
+        self.rect.y = 460
 
 
-       self.rect = self.image.get_rect()
-
-       self.rect.x = 400
-       self.rect.y = 460
-
+drop_money = pygame.sprite.Group()  # Группа с падающимися монетами
 
 money = pygame.sprite.Group()
 
 # Первая точка появления
 change_x = 400
+
 while change_x <= 750:
     money_bronze = Money()
     money_bronze.rect.x = change_x
@@ -346,6 +402,12 @@ while change_x <= 1450:
     change_x += 150
     money.add(money_bronze)
 
+appear_1 = 1
+while appear_1 <= 4:
+    money_bronze_2 = Money()
+    drop_money.add(money_bronze_2)
+    appear_1 += 1
+
 
 class MoneyGold(pygame.sprite.Sprite):
     def __init__(self):
@@ -353,27 +415,26 @@ class MoneyGold(pygame.sprite.Sprite):
         self.image = pygame.image.load("coinGold.png").convert_alpha()
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
 
         self.rect.x = 1800
         self.rect.y = 460
 
+
 # Золотая монета
 money_wins = pygame.sprite.Group()
 money_gold = MoneyGold()
 money_wins.add(money_gold)
+drop_money.add(money_gold)
 
 
 class Worm_green(pygame.sprite.Sprite):
-
     def __init__(self):
 
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.image.load("wormGreen.png").convert_alpha()
         self.image.set_colorkey(white)
-
 
         self.rect = self.image.get_rect()
 
@@ -383,13 +444,17 @@ class Worm_green(pygame.sprite.Sprite):
 
         self.health = 100
         self.damage = 10
+        self.kickback = 30
 
         # Анимация
         self.Anim_worm_green = pyganim.PygAnimation(Anim_worm_dead)
+        self.Anim_worm_green_move = pyganim.PygAnimation(Anim_worm_move)
 
     def update(self):
 
         self.rect.x += self.speed
+        self.Anim_worm_green_move.play()
+        self.Anim_worm_green_move.blit(self.image, (0, 0))
 
         if self.rect.x < 600:
             self.speed *= -1
@@ -397,7 +462,7 @@ class Worm_green(pygame.sprite.Sprite):
         if self.rect.x > 1001:
             self.speed *= -1
 
-        if self.health == 0:
+        if self.health <= 0:
             self.Anim_worm_green.play()
             self.Anim_worm_green.blit(self.image, (0, 0))
 
@@ -409,7 +474,6 @@ class Worm_pink(pygame.sprite.Sprite):
         self.image = pygame.image.load("wormPink.png").convert_alpha()
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
 
         self.rect.x = 1700
@@ -418,10 +482,17 @@ class Worm_pink(pygame.sprite.Sprite):
 
         self.health = 100
         self.damage = 10
+        self.kickback = 30
+
+        # Анимация
+        self.AnimwormPink_move = pyganim.PygAnimation(Anim_worm_pink)
+        self.Anim_wormPink_dead = pyganim.PygAnimation(Anim_wormPink_dead)
 
     def update(self):
 
         self.rect.x += self.speed
+        self.AnimwormPink_move.play()
+        self.AnimwormPink_move.blit(self.image, (0, 0))
 
         if self.rect.x < 1200:
             self.speed *= -1
@@ -429,13 +500,16 @@ class Worm_pink(pygame.sprite.Sprite):
         if self.rect.x > 1701:
             self.speed *= -1
 
+        if self.health <= 0:
+            self.Anim_wormPink_dead.play()
+            self.Anim_wormPink_dead.blit(self.image, (0, 0))
+
 
 mobs_worm = pygame.sprite.Group()
 worm = Worm_green()
 worm_pink = Worm_pink()
 mobs_worm.add(worm)
 mobs_worm.add(worm_pink)
-
 
 """class Jump(pygame.sprite.Sprite):
     def __init__(self):
@@ -465,10 +539,11 @@ class Bomb(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (100, 100))
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
 
-        self.drop = 10 # Скорость падения
+        self.drop = 10  # Скорость падения
+        self.damage = 100 # Урон бомбы
+
 
 inventory = pygame.sprite.Group()
 bomb = Bomb()
@@ -488,9 +563,11 @@ class Star(pygame.sprite.Sprite):
         self.rect.x = 3700
         self.rect.y = 443
 
+
 wins = pygame.sprite.Group()
 star = Star()
 wins.add(star)
+
 
 class Fly(pygame.sprite.Sprite):
     def __init__(self):
@@ -499,22 +576,29 @@ class Fly(pygame.sprite.Sprite):
         self.image = pygame.image.load("fly.png").convert_alpha()
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
 
         self.rect.x = 2000
-        self.rect.y = 100
+        self.rect.y = 30
 
         self.speed = 12
+        self.damage = 20
+        self.kickback = 50
+
+        self.Anim_fly = pyganim.PygAnimation(Anim_fly)
 
     def update(self):
         self.rect.x += self.speed
+
+        self.Anim_fly.blit(self.image, (0, 0))
+        self.Anim_fly.play()
 
         if self.rect.x <= 1800:
             self.speed *= -1
 
         if self.rect.x >= 2200:
             self.speed *= -1
+
 
 mobs_fly = pygame.sprite.Group()
 fly = Fly()
@@ -537,7 +621,6 @@ class FireBall(pygame.sprite.Sprite):
         self.rect.y += self.speed
 
 
-
 particles = pygame.sprite.Group()
 fire = FireBall()
 particles.add(fire)
@@ -548,56 +631,78 @@ class Mouse(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.image.load("mouse.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (100, 100))
         self.image.set_colorkey(white)
 
         self.rect = self.image.get_rect()
 
         self.rect.x = 2500
-        self.rect.y = 470
+        self.rect.y = 443
 
         self.speed = 17
         self.health = 100
         self.damage = 15
+        self.kickback = 50
+
+        self.AnimMouse = pyganim.PygAnimation(Anim_mouse)
+        self.AnimMouse_dead = pyganim.PygAnimation(Anim_mouse_dead)
 
     def update(self):
 
         self.rect.x -= self.speed
+
+        self.AnimMouse.play()
+        self.AnimMouse.blit(self.image, (0, 0))
 
         if self.rect.x < 2200:
             self.speed *= -1
         if self.rect.x > 2800:
             self.speed *= - 1
 
+        if self.health <= 0:
+            self.AnimMouse_dead.play()
+            self.AnimMouse_dead.blit(self.image, (0, 0))
+
 
 mouse = Mouse()
 mobs_worm.add(mouse)
+
 
 class Mouse_2(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
         self.image = pygame.image.load("mouse.png").convert_alpha()
-        self.image = pygame.transform.scale(self.image, (100, 100))
         self.image.set_colorkey(white)
 
         self.rect = self.image.get_rect()
 
         self.rect.x = 3400
-        self.rect.y = 470
+        self.rect.y = 443
 
         self.speed = 17
         self.health = 100
         self.damage = 15
+        self.kickback = 50
+
+        self.AnimMouse_dead = pyganim.PygAnimation(Anim_mouse_dead)
+        self.AnimMouse = pyganim.PygAnimation(Anim_mouse)
 
     def update(self):
 
         self.rect.x -= self.speed
 
+        self.AnimMouse.play()
+        self.AnimMouse.blit(self.image, (0, 0))
+
         if self.rect.x < 3200:
             self.speed *= -1
         if self.rect.x > 3800:
             self.speed *= - 1
+
+        if self.health <= 0:
+            self.AnimMouse_dead.play()
+            self.AnimMouse_dead.blit(self.image, (0, 0))
+
 
 mouse_2 = Mouse_2()
 mobs_worm.add(mouse_2)
@@ -609,15 +714,160 @@ class Exit(pygame.sprite.Sprite):
         self.image = pygame.image.load("signExit.png").convert_alpha()
         self.image.set_colorkey(white)
 
-
         self.rect = self.image.get_rect()
 
         self.rect.x = 3870
         self.rect.y = 450
 
+
 table = pygame.sprite.Group()
 exit_level = Exit()
 table.add(exit_level)
+
+
+class YellowBox(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("lockYellow.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 700
+        self.rect.y = 443
+
+
+box = pygame.sprite.Group()
+yellow_box = YellowBox()
+box.add(yellow_box)
+
+
+class Bee(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("bee.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 800
+        self.rect.y = 50
+
+        self.health = 255
+        self.damage = 10
+        self.speed = 10
+        self.kickback = 50
+        self.drop = 5
+
+        # Анимация
+        self.Anim_bee_dead = pyganim.PygAnimation(Anim_bee_dead)
+        self.Anim_bee_move = pyganim.PygAnimation(Anim_bee)
+
+    def update(self, go_attack):
+
+        if go_attack is False and return_in_usual is False:
+            self.rect.x -= self.speed
+
+        if self.health <= 0:
+            self.rect.y += self.drop
+            self.Anim_bee_dead.play()
+            self.Anim_bee_dead.blit(self.image, (0, 0))
+
+        if self.rect.x <= 100 and go_attack is False and return_in_usual is False:
+            self.speed *= -1
+        if self.rect.x >= 900 and go_attack is False and return_in_usual is False:
+            self.speed *= - 1
+
+        if self.health > 0:
+            self.Anim_bee_move.play()
+            self.Anim_bee_move.blit(self.image, (0, 0))
+
+    def attack(self, go_attack, collide_ground, return_in_usual):
+        if go_attack is True:
+            if self.rect.x > yellow_hero.rect.x:
+                if self.speed > 0:
+                    # Разворачиваемся
+                    self.speed *= -1
+                    # Уменьшаем x
+                    self.rect.x += self.speed
+                    # Опускаемся
+                    if collide_ground is False:
+                        self.rect.y -= self.speed
+                else:
+                    # Не разворачиваемся
+                    # Уменьшаем х
+                    self.rect.x += self.speed
+                    # Опускаемся
+                    if collide_ground is False:
+                        self.rect.y -= self.speed
+            elif self.rect.x <= yellow_hero.rect.x:
+                if self.speed > 0:
+                    # Увеличиваем х
+                    self.rect.x += self.speed
+                    # Опускаемся
+                    if collide_ground is False:
+                        self.rect.y += self.speed
+                else:
+                    # Разворачиваемся
+                    self.speed *= -1
+                    # Увеличиваем х
+                    self.rect.x -= self.speed
+                    # Увеличиваем y и опускаемся
+                    if collide_ground is False:
+                        self.rect.y -= self.speed
+        if return_in_usual is True:
+            if self.speed >= 0:
+                self.rect.y -= self.speed
+            else:
+                self.rect.y += self.speed
+
+
+mobs_fly_level_2 = pygame.sprite.Group()
+bee = Bee()
+go_attack = False
+collide_ground = False
+return_in_usual = False
+mobs_fly_level_2.add(bee)
+
+
+class GemRed(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("gemRed.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 300
+        self.rect.y = -200
+
+        self.drop = 10
+
+    def update(self):
+        self.rect.y += self.drop
+
+bonus = pygame.sprite.Group()
+gemRed = GemRed()
+bonus.add(gemRed)
+
+
+class Key(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("keyYellow.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 0
+        self.rect.y = 0
+
+keys = pygame.sprite.Group()
+yellow_key = Key()
+keys.add(yellow_key)
 
 
 class Camera(object):
@@ -633,76 +883,91 @@ class Camera(object):
 
 
 def camera_configure(camera, target_rect):
-        l, t, _, _ = target_rect
-        _, _, w, h = camera
-        l = -l + window_width / 2
-        t = -t + window_height / 2
+    l, t, _, _ = target_rect
+    _, _, w, h = camera
+    l = -l + window_width / 2
+    t = -t + window_height / 2
 
-        l = min(0, l)
-        l = max(-(camera.width - window_width), l)
-        t = max(-(camera.height - window_height), t)
-        t = min(0, t)
-        return Rect(l, t, w, h)
+    l = min(0, l)
+    l = max(-(camera.width - window_width), l)
+    t = max(-(camera.height - window_height), t)
+    t = min(0, t)
+    return Rect(l, t, w, h)
 
-total_level_width = 4000 # Ширина уровня
-total_level_height = 1000 # Высота уровня
+
+total_level_1_width = 4000  # Длина первого уровня
+total_level_1_height = 1000  # Высота первого уровня
+
+total_level_2_width = 1000 # Длина второго уровня
+total_level_2_height = 1000 # Высота второго уровня
 
 # Экземпляр динамической камеры
-camera = Camera(camera_configure, total_level_width, total_level_height)
+camera = Camera(camera_configure, total_level_1_width, total_level_1_height)
+camera_2 = Camera(camera_configure, total_level_2_width, total_level_2_height)
 
 # Совокупность экземпляров
 entities = pygame.sprite.Group()
-entities.add(player)
-entities.add(blocks)
-entities.add(money)
-entities.add(mobs_worm)
-entities.add(mobs_fly)
-entities.add(money_wins)
-entities.add(wins)
-entities.add(table)
 
 
+entities_level_2 = pygame.sprite.Group()
 
-def music_player():
-    main_music = pyglet.media.load("Adventure.mp3")
-    pygame.time.delay(10000)
-    main_music.play()
+
+# Загрузка сохранений
+def load():
+    f = open("Save.txt", "r")
+    yellow_hero.count_money = int(f.read(1) + f.read(2))
+    yellow_hero.star = int(f.read(3))
+    yellow_hero.amount_bomb = int(f.read(4))
+    f.close()
+
+load()
+
 
 def menu(f_game_go):
-
-    lobby = True # Игрок в меню
+    lobby = True  # Игрок в меню
     global audio_On
-    audio_On = True # Музыка включена
-    menu_load = False # Всплывающее меню
-    fullScreen = False # Полноэкранный режим
-    music_On = False # Музыка не включена
-    music_play = False # Музыка не проигрывается
-    shop_load = False # Магазин не открыт
-    settings = False # Настройки не включены
-    shop_character = False # Покупка персонажей в магазине не выбрана
-    shop_tools = False # Покупка инстументов не выбрана
-    increase_bomb = False # Не покупаем бомбы
-    price_bomb = 20
+    global level_1
+    global level_2
+    global music_On
+    audio_On = True  # Музыка включена
+    level_1 = False  # Уровень 1 не запущен
+    level_2 = False  # Уровень 2 не запущен
+    menu_load = False  # Всплывающее меню
+    fullScreen = False  # Полноэкранный режим
+    music_On = False  # Музыка не включена
+    shop_load = False  # Магазин не открыт
+    settings = False  # Настройки не включены
+    shop_character = False  # Покупка персонажей в магазине не выбрана
+    shop_tools = False  # Покупка инстументов не выбрана
+    increase_bomb = False  # Не покупаем бомбы
+    level_select = False  # Выбор уровня
+    price_bomb = 5 # Цена за бомбу
+    save = False # Игрок не нажал кнопку сохранения
 
     while lobby is True:
 
-        crossing = False # Нет пересечения с кнопкой запуска игры
-        crossing_2 = False # Нет пересечения с кнопкой звука
-        crossing_3 = False # Нет пересечения с кнопкой полнокэранного режима
-        crossing_4 = False # Нет пересечения с кнопкой меню
-        crossing_5 = False # Нет пересечения с кнопкой магазина
-        crossing_6 = False # Нет пересечения с кнопкой кубка
-        crossing_7 = False # Нет пересечения с кнопкой выхода
-        crossing_8 = False # Нет пересечения с кнопкой музыки
-        crossing_9 = False # Нет пересечения с кнопкой возврата
-        crossing_10 = False # Нет пересечения с кнопкой настроек
-        crossing_11 = False # Нет пересечения со второй кнопкой возврата
-        crossing_12 = False # Нет пересечения с иконкой персонажа в магазине
-        crossing_13 = False # Нет пересечения с иконкой бомбы
-        crossing_14 = False # Нет пересечения с кнопкой плюса
+        crossing = False  # Нет пересечения с кнопкой запуска игры
+        crossing_2 = False  # Нет пересечения с кнопкой звука
+        crossing_3 = False  # Нет пересечения с кнопкой полнокэранного режима
+        crossing_4 = False  # Нет пересечения с кнопкой меню
+        crossing_5 = False  # Нет пересечения с кнопкой магазина
+        crossing_6 = False  # Нет пересечения с кнопкой кубка
+        crossing_7 = False  # Нет пересечения с кнопкой выхода
+        crossing_8 = False  # Нет пересечения с кнопкой музыки
+        crossing_9 = False  # Нет пересечения с кнопкой возврата
+        crossing_10 = False  # Нет пересечения с кнопкой настроек
+        crossing_11 = False  # Нет пересечения со второй кнопкой возврата
+        crossing_12 = False  # Нет пересечения с иконкой персонажа в магазине
+        crossing_13 = False  # Нет пересечения с иконкой бомбы
+        crossing_14 = False  # Нет пересечения с кнопкой плюса
+        crossing_15 = False  # Нет пересечения с кнопкой выбора уровня
+        crossing_16 = False  # Нет пересечения с кнопкой первого уровня
+        crossing_17 = False  # Нет пересечения с кнопкой выхода из выбора уровня
+        crossing_18 = False  # Нет пересечения с кнопкой второго уровня
+        crossing_19 = False # Нет пересечения с кнопкой сохранения
 
         no_bomb = (str(yellow_hero.amount_bomb))
-        (x5, y5, fontsize) = (535, 310, 45)
+        (x6, y6, fontsize) = (540, 310, 45)
         myFont5 = pygame.font.SysFont("None", fontsize)
         fontImage5 = myFont5.render(no_bomb, 0, green)
 
@@ -716,8 +981,23 @@ def menu(f_game_go):
         myFont = pygame.font.SysFont("None", fontsize)
         fontImage7 = myFont.render(bomb_pr, 0, green)
 
+        change_level = ("Choose level")
+        (x3, y3, fontsize) = (300, 100, 50)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage8 = myFont.render(change_level, 0, blue)
+
+        hud_star = (str(yellow_hero.star))
+        (x4, y4, fontsize) = (645, 85, 45)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage9 = myFont.render(hud_star, 0, green)
+
+        save_game = ("Game was saved")
+        (x5, y5, fontsize) = (300, 100, 50)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage10 = myFont.render(save_game, 0, blue)
+
         for x_3 in range(start_x, start_x + 90):
-            for y_3 in range(start_y, start_y + 60):
+            for y_3 in range(start_y + 20, start_y + 80):
                 pos = pygame.mouse.get_pos()
                 pos_x = pos[0]
                 pos_y = pos[1]
@@ -773,7 +1053,7 @@ def menu(f_game_go):
                     crossing_7 = True
 
         for x_3 in range(music_x, music_x + 35):
-            for y_3 in range(music_y, music_y+ 40):
+            for y_3 in range(music_y, music_y + 40):
                 pos = pygame.mouse.get_pos()
                 pos_x = pos[0]
                 pos_y = pos[1]
@@ -828,15 +1108,55 @@ def menu(f_game_go):
                 if pos_x == x_3 and pos_y == y_3:
                     crossing_14 = True
 
+        for x_3 in range(select_x, select_x + 90):
+            for y_3 in range(select_y + 20, select_y + 80):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_15 = True
+
+        for x_3 in range(number_1_x + 30, number_1_x + 80):
+            for y_3 in range(number_1_y + 20, number_1_y + 80):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_16 = True
+
+        for x_3 in range(quitX_x + 30, quitX_x + 80):
+            for y_3 in range(quitX_y + 20, quitX_y + 80):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_17 = True
+
+        for x_3 in range(number_2_x + 30, number_2_x + 80):
+            for y_3 in range(number_2_y + 20, number_2_y + 80):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_18 = True
+
+        for x_3 in range(save_2_x, save_2_x + 40):
+            for y_3 in range(save_2_y, save_2_y + 40):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_19 = True
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
+                sys.exit()
             if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1 and crossing is True and shop_load is False:
+                if event.button == 1 and crossing is True and shop_load is False and level_select is False:
+                    (lobby, f_game_go, level_1) = (False, True, True)
                     if audio_On is True:
                         switch_button.play()
-                    f_game_go = True
-                    lobby = False
 
                 if event.button == 1 and crossing_2 is True and settings is True:
                     if audio_On is True:
@@ -861,11 +1181,13 @@ def menu(f_game_go):
                     if audio_On is True:
                         switch_1.play()
                     menu_load = True
+                    level_select = False
 
                 elif event.button == 1 and crossing_5 is True and menu_load is True:
                     if audio_On is True:
                         switch_1.play()
                     shop_load = True
+                    level_select = False
 
                 if event.button == 1 and crossing_6 is True and menu_load is True:
                     if audio_On is True:
@@ -875,6 +1197,7 @@ def menu(f_game_go):
                     if audio_On is True:
                         switch_1.play()
                     pygame.quit()
+                    sys.exit()
 
                 if event.button == 1 and crossing_8 is True:
                     music_On = not music_On
@@ -909,16 +1232,69 @@ def menu(f_game_go):
                         switch_1.play()
                     increase_bomb = True
 
+                if event.button == 1 and crossing_15 is True and shop_load is False:
+                    if audio_On is True:
+                        switch_button.play()
+                    level_select = True
+
+                if event.button == 1 and crossing_16 is True and level_select is True:
+                    if audio_On is True:
+                        switch_button.play()
+                    (lobby, f_game_go) = (False, True)
+
+                if event.button == 1 and crossing_17 is True and level_select is True:
+                    if audio_On is True:
+                        switch_1.play()
+                    level_select = False
+
+                if event.button == 1 and crossing_18 is True and level_select is True:
+                    if audio_On is True:
+                        switch_button.play()
+                    (lobby, f_game_go, level_2) = (False, True, True)
+
+                if event.button == 1 and crossing_19 is True and menu_load is True:
+                    if audio_On is True:
+                        switch_1.play()
+                    save = True
+                    # Записываем количество денег, звезд  и бомб в файл
+                    f = open("Save.txt", "w")
+                    if yellow_hero.count_money < 10:
+                        f.write(str("0") + str(yellow_hero.count_money))
+                    else:
+                        f.write(str(yellow_hero.count_money))
+                    f.write(str("\n"))
+                    if yellow_hero.star < 10:
+                        f.write(str("0") + str(yellow_hero.star))
+                    else:
+                        f.write(str(yellow_hero.star))
+                    f.write(str("\n"))
+                    if yellow_hero.star < 10:
+                        f.write(str("0") + str(yellow_hero.amount_bomb))
+                    else:
+                        f.write(str(yellow_hero.amount_bomb))
+                    f.close()
+
         clock.tick(40)
 
         screen.blit(background_color, (0, 0))
         screen.blit(hudCoin_trans, (coin_x, coin_y))
-        screen.blit(fontImage, (x, y))
+        if yellow_hero.count_money < 10:
+            screen.blit(fontImage, (x, y))
+        else:
+            screen.blit(fontImage, (x - 9, y))
         screen.blit(hudLevel, (level_x, level_y))
+        screen.blit(hudStar_trans, (600, -3))
+        screen.blit(fontImage9, (x4, y4))
 
-        if menu_load is False:
+        if menu_load is False and level_select is False:
             screen.blit(button_menu, (start_x, start_y))
             screen.blit(button_select, (select_x, select_y))
+
+        if level_select is True:
+            screen.blit(fontImage8, (x3, y3))
+            screen.blit(hudNumber1, (number_1_x, number_1_y))
+            screen.blit(hudNumber2, (number_2_x, number_2_y))
+            screen.blit(hudQuitX, (quitX_x, quitX_y))
 
         if settings is True:
             if fullScreen is True:
@@ -933,11 +1309,13 @@ def menu(f_game_go):
 
             if music_On is False:
                 screen.blit(hudMusic_off, (music_x, music_y))
+                main_music.pause()
             else:
                 screen.blit(hudMusic_on, (music_x, music_y))
-                if music_play is False and audio_On is True:
-                    music_player()
-                    music_play = True
+                if audio_On is True:
+                    main_music.play()
+                else:
+                    main_music.pause()
 
             screen.blit(hudReturn, (return_x_2, return_y_2))
         else:
@@ -949,6 +1327,7 @@ def menu(f_game_go):
             screen.blit(hudShop, (shop_x, shop_y))
             screen.blit(hudTrophy, (trophy_x, trophy_y))
             screen.blit(hudQuit, (quit_x, quit_y))
+            screen.blit(hudSave_2, (save_2_x, save_2_y))
             screen.blit(hudReturn, (return_x, return_y))
 
         if shop_load is True:
@@ -967,23 +1346,27 @@ def menu(f_game_go):
                 screen.blit(hudBomb, (bomb_x, bomb_y - 100))
                 screen.blit(hudPlus, (plus_x, plus_y))
                 screen.blit(hudCoin_trans, (coin_x_2, coin_y_2))
-                screen.blit(fontImage5, (x5, y5))
+                screen.blit(fontImage5, (x6, y6))
                 screen.blit(fontImage7, (x2, y2))
                 if increase_bomb is True:
-                    if yellow_hero.count_money >= 20:
+                    if yellow_hero.count_money >= 5:
                         yellow_hero.amount_bomb += 1
-                        yellow_hero.count_money -= 20
+                        yellow_hero.count_money -= 5
                     increase_bomb = False
             else:
                 screen.blit(hudYellowPlayer, (yellowPlayer_x_2, yellowPlayer_y_2))
                 screen.blit(hudBomb, (bomb_x, bomb_y))
 
-        pygame.display.update()
+        if save is True:
+            screen.blit(fontImage10, (x5, y5))
+            if menu_load is False or shop_load is True or settings is True:
+                save = False
 
+        pygame.display.update()
     return f_game_go
 
-menu(game_go)
 
+menu(game_go)
 
 
 def stop():
@@ -996,21 +1379,52 @@ def stop():
 
 
 def pause():
+    pause = True
 
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-        elif event.type == MOUSEBUTTONDOWN:
-            if event.button == 1:
-                rungame(left_move, right_move, up_move, damage_mobs)
-                pygame.display.update()
+    while pause:
+
+        crossing = False  # Пересечение с кнопкой активации
+        crossing_2 = False  # Пересечение с кнопкой выхода в меню
+
+        for x_3 in range(pause_x, pause_x + 30):
+            for y_3 in range(pause_y, pause_y + 30):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing = True
+
+        for x_3 in range(door_x, door_x + 30):
+            for y_3 in range(door_y, door_y + 30):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_2 = True
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1 and crossing is True and level_1 is True:
+                    rungame(left_move, right_move, up_move, damage_mobs)
+                if event.button == 1 and crossing is True and level_2 is True:
+                    rungame_level_2(left_move, right_move, up_move, damage_mobs, collide_ground, go_attack, return_in_usual)
+                if event.button == 1 and crossing_2 is True:
+                    menu(game_go)
+
+        screen.blit(hudDoor, (door_x, door_y))
+        screen.blit(hudSave, (save_x, save_y))
+        pygame.display.update()
 
     return None
 
 
 def game_over():
-
-    while stop() == None:
+    pygame.time.wait(100)
+    lose = True
+    while lose:
 
         dead_text = ("You were killed! Press any key!")
         (x4, y4, fontsize4) = (100, 300, 60)
@@ -1020,15 +1434,16 @@ def game_over():
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
+                sys.exit()
             if event.type == KEYDOWN or (event.type == MOUSEBUTTONDOWN and event.button == 1):
                 pygame.quit()
+                sys.exit()
 
         screen.blit(fontImage4, (x4, y4))
         pygame.display.update()
 
 
 def game_wins():
-
     wins = ("Congratulations! You wins! Press any key")
     (x6, y6, fontsize6) = (100, 300, 30)
     myFont6 = pygame.font.SysFont("None", fontsize6)
@@ -1039,14 +1454,14 @@ def game_wins():
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
+                sys.exit()
             if event.type == KEYDOWN or (event.type == MOUSEBUTTONDOWN and event.button == 1):
-                game_go = False
-                menu(game_go)
                 stop = False
-                pygame.display.update()
+                menu(game_go)
 
         screen.blit(fontImage6, (x6, y6))
         pygame.display.update()
+
 
 def repeat_game():
     pygame.init()
@@ -1068,14 +1483,26 @@ def repeat_game():
 
 
 def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
-
-    launch_of_game = True # Игра запущена!
-    confirmation = False # Бомба не установлена!
-    stop_game = False # Игра не остановлена
-    download_bomb = 0 # Количество установленных бомб!
-    crossing = False # Нет пересечения с изображением
+    launch_of_game = True  # Игра запущена!
+    confirmation = False  # Бомба не установлена!
+    stop_game = False  # Игра не остановлена
+    download_bomb = 0  # Количество установленных бомб!
+    time = 0 # Время игры
+    time_death = 0 # Время убийства зеленого червя
+    time_death_2 = 0 # Время убийства розового червя
+    time_death_3 = 0 # Время убийства первой мыши
+    time_death_4 = 0 # Время убийства второй мыши
+    global game_completed
+    game_completed = False # Уровень не пройден.
+    worm_death = False # Зеленый червь не умер
+    worm_pink_death = False # Розовый червь не умер
+    mouse_death = False # Мышь не сдохла
+    mouse_death_2 = False # Вторая мышь не сдохла
 
     while launch_of_game:
+
+        crossing = False  # Нет пересечения с изображением
+
         # Собранные монеты
         text_money = (str(yellow_hero.count_money))
         (x, y, fontsize) = (780, 35, 45)
@@ -1092,42 +1519,81 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         myFont5 = pygame.font.SysFont("None", fontsize)
         fontImage5 = myFont5.render(no_bomb, 0, green)
 
-        collisions = pygame.sprite.spritecollide(yellow_hero, mobs_worm, False)
+        collisions = pygame.sprite.spritecollide(worm, player, False)
         if len(collisions) > 0:
-            if audio_On is True:
+            if audio_On is True and worm_death is False:
                 hit_worm.play()
 
-            # В случае удара герой отскакивает и получает урон
             if yellow_hero.rect.x > worm.rect.x:
-                yellow_hero.rect.x += 30
+                yellow_hero.rect.x += worm.kickback
+                yellow_hero.health -= worm.damage
+            elif yellow_hero.rect.x <= worm.rect.x:
+                yellow_hero.rect.x -= worm.kickback
                 yellow_hero.health -= worm.damage
 
-            elif yellow_hero.rect.x < worm.rect.x:
-                yellow_hero.rect.x -= 30
-                yellow_hero.health -= worm.damage
-
-            elif yellow_hero.rect.x < worm_pink.rect.x:
-                yellow_hero.rect.x -= 30
-                yellow_hero.health -= worm_pink.damage
-
-            elif yellow_hero.rect.x > worm_pink.rect.x:
-                yellow_hero.rect.x += 30
-                yellow_hero.health -= worm_pink.damage
-
-            elif yellow_hero.rect.x > mouse.rect.x:
-                yellow_hero.rect.x += 30
-                yellow_hero.health -= mouse.damage
-
-            else:
-                yellow_hero.rect.x += 30
-
-            if yellow_hero.health == 0:
+            if yellow_hero.health <= 0:
                 game_over()
 
-            f_damage_mobs = True
+            if worm_death is False:
+                yellow_hero.AnimationHit.play()
+                yellow_hero.AnimationHit.blit(yellow_hero.image, (0, 0))
 
-        else:
-            f_damage_mobs = False
+        collisions = pygame.sprite.spritecollide(worm_pink, player, False)
+        if len(collisions) > 0:
+            if audio_On is True and worm_pink_death is False:
+                hit_worm.play()
+
+            if yellow_hero.rect.x > worm_pink.rect.x:
+                yellow_hero.rect.x += worm_pink.kickback
+                yellow_hero.health -= worm_pink.damage
+            elif yellow_hero.rect.x <= worm_pink.rect.x:
+                yellow_hero.rect.x -= worm_pink.kickback
+                yellow_hero.health -= worm_pink.damage
+
+            if yellow_hero.health <= 0:
+                game_over()
+
+            if worm_pink_death is False:
+                yellow_hero.AnimationHit.play()
+                yellow_hero.AnimationHit.blit(yellow_hero.image, (0, 0))
+
+        collisions = pygame.sprite.spritecollide(mouse, player, False)
+        if len(collisions) > 0:
+            if audio_On is True and mouse_death is False:
+                hit_worm.play()
+
+            if yellow_hero.rect.x > mouse.rect.x:
+                yellow_hero.rect.x += mouse.kickback
+                yellow_hero.health -= mouse.damage
+            elif yellow_hero.rect.x <= mouse.rect.x:
+                yellow_hero.rect.x -= mouse.kickback
+                yellow_hero.health -= mouse.damage
+
+            if yellow_hero.health <= 0:
+                game_over()
+
+            if mouse_death is False:
+                yellow_hero.AnimationHit.play()
+                yellow_hero.AnimationHit.blit(yellow_hero.image, (0, 0))
+
+        collisions = pygame.sprite.spritecollide(mouse_2, player, False)
+        if len(collisions) > 0:
+            if audio_On is True and mouse_death_2 is False:
+                hit_worm.play()
+
+            if yellow_hero.rect.x > mouse_2.rect.x:
+                yellow_hero.rect.x += mouse_2.kickback
+                yellow_hero.health -= mouse_2.damage
+            elif yellow_hero.rect.x < mouse_2.rect.x:
+                yellow_hero.rect.x -= mouse_2.kickback
+                yellow_hero.health -= mouse_2.damage
+
+            if yellow_hero.health <= 0:
+                game_over()
+
+            if mouse_death_2 is False:
+                yellow_hero.AnimationHit.play()
+                yellow_hero.AnimationHit.blit(yellow_hero.image, (0, 0))
 
         collisions = pygame.sprite.spritecollide(yellow_hero, money, True)
         if len(collisions) > 0:
@@ -1154,6 +1620,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         collisions = pygame.sprite.spritecollide(yellow_hero, wins, True)
         if len(collisions) > 0:
             pygame.time.delay(20)
+            yellow_hero.star += 1
             if audio_On is True:
                 wins_music.play()
 
@@ -1162,10 +1629,13 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             bomb.rect.y += bomb.drop
 
         collisions = pygame.sprite.spritecollide(yellow_hero, inventory, False)
-        if len(collisions) > 0 and f_right_move == True:
+        if len(collisions) > 0 and bomb.rect.x > yellow_hero.rect.x:
             bomb.rect.x += 10
-        if len(collisions) > 0 and f_left_move == True:
+        if len(collisions) > 0 and bomb.rect.x < yellow_hero.rect.x and bomb.rect.x != 0:
             bomb.rect.x -= 10
+        if len(collisions) > 0 and bomb.rect.x == 0 and download_bomb is True:
+            yellow_hero.rect.x += 10
+            f_left_move = False
 
         collisions = pygame.sprite.spritecollide(yellow_hero, mobs_fly, False)
         if len(collisions) > 0:
@@ -1173,24 +1643,30 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 hit_worm.play()
 
             if yellow_hero.rect.x > fly.rect.x:
-                yellow_hero.rect.x += 10
+                yellow_hero.rect.x += fly.kickback
 
             else:
-                yellow_hero.rect.x -= 10
+                yellow_hero.rect.x -= fly.kickback
 
-            yellow_hero.health -= 10
+            yellow_hero.health -= fly.damage
 
-            if yellow_hero.health == 0:
+            if yellow_hero.health <= 0:
                 game_over()
+            f_damage_mobs = True
 
         collisions = pygame.sprite.spritecollide(yellow_hero, table, False)
         if len(collisions) > 0:
+            launch_of_game = False
+            game_completed = True
             game_wins()
 
         collisions = pygame.sprite.spritecollide(yellow_hero, particles, True)
         if len(collisions) > 0:
+            if audio_On is True:
+                hit_worm.play()
             yellow_hero.health -= 10
-
+            if yellow_hero.health <= 0:
+                game_over()
 
         # Взаимодействие с кнопками
         for x_3 in range(pause_x, pause_x + 30):
@@ -1201,16 +1677,19 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 if pos_x == x_3 and pos_y == y_3:
                     crossing = True
 
+        # Атака летающих мобов
         for fly_x in range(fly.rect.x, fly.rect.x + 200):
             if yellow_hero.rect.x == fly_x:
                 entities.add(particles)
-                fire.rect.x = fly.rect.x
-                fire.rect.y = fly.rect.y
-
+                fire.rect.x = fly.rect.x - 10
+                fire.rect.y = fly.rect.y + 10
+                if yellow_hero.health > 0:
+                    particles.add(fire)
 
         for event in pygame.event.get():
             if event.type == QUIT:
                 launch_of_game = False
+                sys.exit()
 
             # Клавиши нажаты!
             if event.type == KEYDOWN:
@@ -1242,13 +1721,51 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
                     for x in range(bomb.rect.x - 230, bomb.rect.x + 230):
                         if x == worm.rect.x:
-                            worm.health = 0
-                            worm.kill()
+                            worm.health -= bomb.damage
+                            yellow_hero.count_money += 1
+                            time_death = time
+                            worm.speed = 0
+                            worm.damage = 0
+                            worm.kickback = 0
+                            worm_death = True
+                            """entities.add(drop_money)
+                            money_bronze_2.rect.x = worm.rect.x
+                            money_bronze_2.rect.y = worm.rect.y"""
                         elif x == worm_pink.rect.x:
-                            worm_pink.kill()
+                            worm_pink.health -= bomb.damage
+                            yellow_hero.count_money += 1
+                            time_death_2 = time
+                            worm_pink.speed = 0
+                            worm_pink.damage = 0
+                            worm_pink.kickback = 0
+                            worm_pink_death = True
+                            """entities.add(drop_money)
+                            money_bronze.rect.x = worm_pink.rect.x
+                            money_bronze.rect.y = worm_pink.rect.y"""
 
                         elif x == mouse.rect.x:
-                            mouse.kill()
+                            mouse.health -= bomb.damage
+                            yellow_hero.count_money += 2
+                            time_death_3 = time
+                            mouse.speed = 0
+                            mouse.damage = 0
+                            mouse.kickback = 0
+                            mouse_death = True
+                            """entities.add(drop_money)
+                            money_bronze.rect.x = mouse.rect.x
+                            money_bronze.rect.y = mouse.rect.y"""
+
+                        elif x == mouse_2.rect.x:
+                            mouse_2.health -= bomb.damage
+                            yellow_hero.count_money += 2
+                            time_death_4 = time
+                            mouse_2.speed = 0
+                            mouse_2.damage = 0
+                            mouse_2.kickback = 0
+                            mouse_death_2 = True
+                            """entities.add(drop_money)
+                            money_bronze.rect.x = mouse_2.rect.x
+                            money_bronze.rect.y = mouse_2.rect.y"""
 
                 if event.button == 1 and crossing is True:
                     if audio_On is True:
@@ -1265,8 +1782,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     yellow_hero.rect.y -= yellow_hero.jump
                     yellow_hero.onGround = False
 
-
-        # Клавиши отпущены
+                    # Клавиши отпущены
             if event.type == KEYUP:
                 if event.key == K_RIGHT:
                     f_right_move = False
@@ -1274,8 +1790,6 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     f_left_move = False
                 if event.key == K_UP:
                     f_up_move = False
-
-        # Атака летающих мобов
 
         # Прыжок персонажа
         if yellow_hero.onGround is True:
@@ -1305,9 +1819,18 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         else:
             screen.blit(hudHealth_trans, (800, 70))
 
-        screen.blit(fontImage, (x, y))
-        screen.blit(fontImage2, (x2, y2))
-        screen.blit(fontImage5, (x5, y5))
+        if yellow_hero.count_money < 10:
+            screen.blit(fontImage, (x, y))
+        else:
+            screen.blit(fontImage, (x - 10, y))
+        if yellow_hero.health >= 100:
+            screen.blit(fontImage2, (x2, y2))
+        else:
+            screen.blit(fontImage2, (x2 + 20, y2))
+        if yellow_hero.amount_bomb < 10:
+            screen.blit(fontImage5, (x5, y5))
+        else:
+            screen.blit(fontImage5, (x5 - 10, y5))
         if stop_game is False:
             screen.blit(hudPause, (pause_x, pause_y))
         else:
@@ -1316,14 +1839,13 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
         clock.tick(40)
 
-    # Рисуем персонажей!
+        # Рисуем персонажей!
         for event in entities:
             screen.blit(event.image, camera.apply(event))
             camera.update(yellow_hero)
 
 
-
-    # Обновляем персонажей
+            # Обновляем персонажей
         if stop_game is False:
             player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
             mobs_worm.update()
@@ -1331,17 +1853,389 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             bomb.update()
             particles.update()
             pygame.display.update()
+            if time - time_death == 100 and time_death != 0:
+                worm.kill()
+
+            if time - time_death_2 == 100 and time_death_2 != 0:
+                worm_pink.kill()
+
+            if time - time_death_3 == 100 and time_death_3 != 0:
+                mouse.kill()
+
+            if time - time_death_4 == 100 and time_death_4 != 0:
+                mouse_2.kill()
+
+            if main_music.playing is False and music_On is True and audio_On is True:
+                main_music.play()
+
+            time += 1
         else:
+            main_music.pause()
             pause()
 
     pygame.quit()
+    sys.exit()
+
+
+def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_attack, f_collide_ground, f_return_in_usual):
+    level_2 = True  # уровень запущен
+    global game_completed_2
+    game_completed_2 = False # Уровень не пройден
+    stop_game = False # Игра не остановлена
+    download_bomb = 0 # Нет установленных бомб
+    confirmation = False # Бомба не установлена
+    time = 0 # Время игры
+    bee_in_game = False # Пчела не прилетела
+    key = False # Ключ не подобран (Я не уверен, что именно для этого)
+    redStone = False # Камень не появился
+    time_death = 0 # Время убийства пчелы
+    bee_death = False # Пчела не убита
+    box_use = False # Не взламываем ящик
+    beige_player_in_game = False # Бежевый персонаж не в игре
+    time_appear = 0 # Время появление бежевого персонажа
+    while level_2 is True:
+
+        crossing = False # Нет пересечения с кнопкой паузы
+        box_crossing = False # Персонаж не у ящика
+        press_button = False # Кнопку нельзя нажимать
+
+        text_money = (str(yellow_hero.count_money))
+        (x, y, fontsize) = (780, 35, 45)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage = myFont.render(text_money, 0, green)
+
+        health = (str(yellow_hero.health))
+        (x2, y2, fontsize) = (745, 98, 45)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage2 = myFont.render(health, 0, green)
+
+        no_bomb = (str(yellow_hero.amount_bomb))
+        (x5, y5, fontsize) = (770, 170, 45)
+        myFont5 = pygame.font.SysFont("None", fontsize)
+        fontImage5 = myFont5.render(no_bomb, 0, green)
+
+        press_f = ("Press F")
+        (x3, y3, fontsize) = (400, 200, 45)
+        myFont3 = pygame.font.SysFont("None", fontsize)
+        fontImage3 = myFont3.render(press_f, 0, blue)
+
+        collisions = pygame.sprite.spritecollide(bomb, blocks, False)
+        if len(collisions) == 0:
+            bomb.rect.y += bomb.drop
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, inventory, False)
+        if len(collisions) > 0 and bomb.rect.x > yellow_hero.rect.x:
+            bomb.rect.x += 10
+        if len(collisions) > 0 and bomb.rect.x < yellow_hero.rect.x and bomb.rect.x != 0:
+            bomb.rect.x -= 10
+        if len(collisions) > 0 and bomb.rect.x == 0 and download_bomb is True:
+            f_left_move = False
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, box, False)
+        if len(collisions) > 0 and yellow_hero.rect.x < yellow_box.rect.x:
+            f_right_move = False
+            yellow_hero.rect.x -= 10
+            box_crossing = True
+            press_button = True
+            if box_use is True:
+                box_open.play()
+                entities_level_2.add(AI_player)
+                beige_player.rect.x = yellow_box.rect.x
+                beige_player.rect.y = yellow_box.rect.y - 129
+                beige_player_in_game = True
+                time_appear = time
+                yellow_box.kill()
+
+        if len(collisions) > 0 and yellow_hero.rect.x > yellow_box.rect.x:
+            f_left_move = False
+            yellow_hero.rect.x += 10
+            box_crossing = True
+            press_button = True
+            if box_use is True:
+                box_open.play()
+                entities_level_2.add(AI_player)
+                beige_player.rect.x = yellow_box.rect.x
+                beige_player.rect.y = yellow_box.rect.y - 129
+                beige_player_in_game = True
+                time_appear = time
+                yellow_box.kill()
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, mobs_fly_level_2, False)
+        if len(collisions) > 0 and bee_in_game is True and bee_death is False:
+            if audio_On is True:
+                hit_worm.play()
+
+            yellow_hero.health -= bee.damage
+            if yellow_hero.rect.x > bee.rect.x:
+                if yellow_hero.rect.x < 870:
+                    yellow_hero.rect.x += bee.kickback
+                else:
+                    bee.kickback = 0
+            else:
+                if yellow_hero.rect.x > 100:
+                    yellow_hero.rect.x -= bee.kickback
+                else:
+                    bee.kickback = 0
+
+            if yellow_hero.health <= 0:
+                game_over()
+
+        collisions = pygame.sprite.spritecollide(bee, blocks, False)
+        if len(collisions) > 0:
+            f_collide_ground = True
+            bee.drop = 0
+        else:
+            f_collide_ground = False
+
+        collisions = pygame.sprite.spritecollide(gemRed, blocks, False)
+        if len(collisions) > 0:
+            gemRed.drop = 0
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, bonus, True)
+        if len(collisions) > 0:
+            wins_music.play()
+            yellow_hero.health += 400
+
+        collisions = pygame.sprite.spritecollide(bee, box, False)
+        if len(collisions) > 0:
+            if bee.rect.x > yellow_box.rect.x:
+                bee.rect.y += bee.speed
+            else:
+                bee.rect.y -= bee.speed
+
+        if bee_death is True:
+            collisions = pygame.sprite.spritecollide(yellow_hero, keys, True)
+            if len(collisions) > 0:
+                if audio_On is True:
+                    wins_music.play()
+                key = True
+
+        # Взаимодействие с кнопками
+        for x_3 in range(pause_x, pause_x + 30):
+            for y_3 in range(pause_y, pause_y + 30):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing = True
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == MOUSEBUTTONDOWN and event.button == 1 and crossing is True:
+                stop_game = True
+
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 3 and download_bomb == 0:
+                    if yellow_hero.amount_bomb <= 0:
+                        print("Бомбы закончились!")
+                    else:
+                        # Координаты расположения бомбы
+                        entities_level_2.add(inventory)
+                        bomb.rect.x = yellow_hero.rect.x
+                        bomb.rect.y = yellow_hero.rect.y + 156
+                        yellow_hero.amount_bomb -= 1
+                        download_bomb += 1
+
+                        if audio_On is True:
+                            sound_click.play()
+
+                        confirmation = True
+                if event.button == 1 and confirmation is True:
+                    download_bomb -= 1
+                    entities_level_2.remove(bomb)
+
+                    if audio_On is True:
+                        explosion.play()
+                    confirmation = False
+
+                    for x in range(bomb.rect.x - 230, bomb.rect.x + 230):
+                        for y in range(bomb.rect.y - 130, bomb.rect.y + 130):
+                            if x == bee.rect.x and y == bee.rect.y:
+                                bee.health -= bomb.damage
+                                if bee.health <= 0:
+                                    yellow_hero.count_money += 10
+                                    time_death = time
+                                    bee.speed = 0
+                                    bee.damage = 0
+                                    bee.kickback = 0
+                                    bee_death = True
+                                    bee_in_game = False
+                                    entities_level_2.add(keys)
+                                    yellow_key.rect.x = bee.rect.x
+                                    yellow_key.rect.y = bee.rect.y
+
+            if event.type == KEYDOWN:
+                if event.key == K_RIGHT:
+                    f_right_move = True
+
+                if event.key == K_LEFT:
+                    f_left_move = True
+
+                if event.key == K_UP and yellow_hero.onGround is True:
+                    f_up_move = True
+                    yellow_hero.rect.y -= yellow_hero.jump
+                    yellow_hero.onGround = False
+
+                if key is True and event.key == K_f and box_crossing is True:
+                    box_use = True # Разрешаем вскрыть ящик
+                    key = False # Теряем ключ (для отображения)
+
+            if event.type == KEYUP:
+                if event.key == K_RIGHT:
+                    f_right_move = False
+
+                if event.key == K_LEFT:
+                    f_left_move = False
+
+                if event.key == K_UP:
+                    f_up_move = False
+
+        # Прыжок персонажа
+        if yellow_hero.onGround is True:
+            yellow_hero.drop = 0
+
+        else:
+            yellow_hero.drop = 5
+            yellow_hero.rect.y += yellow_hero.drop
+            collisions = pygame.sprite.spritecollide(yellow_hero, blocks, False)
+            if len(collisions) > 0:
+                yellow_hero.onGround = True
+            else:
+                yellow_hero.onGround = False
+
+        clock.tick(40)
+
+        screen.blit(background_color, (0, 0))
+        screen.blit(hudCoin_trans, (800, 10))
+
+        if yellow_hero.amount_bomb > 0:
+            screen.blit(hudBomb_trans, (800, 140))
+        else:
+            screen.blit(hudBombNo_trans, (800, 140))
+
+        if yellow_hero.health <= 50 and yellow_hero.health > 0:
+            screen.blit(hudHealthHalf_trans, (800, 70))
+        elif yellow_hero.health == 0:
+            screen.blit(hudHealthEmpty_trans, (800, 70))
+        else:
+            screen.blit(hudHealth_trans, (800, 70))
+
+        if key is False:
+            screen.blit(hudYellowKeyEmpty, (770, 200))
+        else:
+            screen.blit(hudYellowKey, (770, 200))
+
+        if yellow_hero.count_money < 10:
+            screen.blit(fontImage, (x, y))
+        else:
+            screen.blit(fontImage, (x - 10, y))
+
+        if yellow_hero.health >= 100:
+            screen.blit(fontImage2, (x2, y2))
+        else:
+            screen.blit(fontImage2, (x2 + 20, y2))
+
+        if yellow_hero.amount_bomb < 10:
+            screen.blit(fontImage5, (x5, y5))
+        else:
+            screen.blit(fontImage5, (x5 - 10, y5))
+
+        if stop_game is False:
+            screen.blit(hudPause, (pause_x, pause_y))
+        else:
+            screen.blit(hudPlay, (pause_x, pause_y))
+
+        if press_button is True:
+            screen.blit(fontImage3, (x3, y3))
+
+        if time > 500 and bee_death is False:
+            bee_in_game = True
+            entities_level_2.add(mobs_fly_level_2)
+
+        # Воспроизведение жжужания пчелы
+        if bee_death is False and bee_in_game is True:
+            fon_music.play()
+        else:
+            fon_music.pause()
+
+        # Падение красного камня
+        if time > 200:
+            entities_level_2.add(bonus)
+            redStone = True
+
+        # Пчела аттакует
+        if time > 1000 and time < 1100 or time > 1500 and time < 1700 or time > 2000:
+            f_go_attack = True
+            bee.attack(f_go_attack, f_collide_ground, f_return_in_usual)
+        elif time > 1100 and time < 1170 or time > 1700 and time < 1770:
+            if bee.rect.y >= 50:
+                f_return_in_usual = True
+            else:
+                f_return_in_usual = False
+            f_go_attack = False
+            bee.attack(f_go_attack, f_collide_ground, f_return_in_usual)
+
+        # Победа в игре
+        if beige_player.rect.x >= 950:
+            game_complete_2 = True
+            game_wins()
+
+        for event in entities_level_2:
+            screen.blit(event.image, camera_2.apply(event))
+            camera_2.update(yellow_hero)
+
+        if stop_game is False:
+            player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
+            if beige_player_in_game is True and time - time_appear > 200 and time_appear != 0:
+                AI_player.update()
+            bomb.update()
+            if bee_in_game is True:
+                mobs_fly_level_2.update(f_go_attack)
+            if redStone is True:
+                bonus.update()
+
+            if time - time_death == 100 and time_death != 0:
+                bee.kill()
+
+            pygame.display.update()
+
+            if main_music.playing is False and music_On is True and audio_On is True:
+                main_music.play()
+            time += 1
+        else:
+            fon_music.pause()
+            main_music.pause()
+            pause()
+
+
+def repeat(f_game_go):
+    if f_game_go is True and level_1 is True:
+        entities.add(player)
+        entities.add(blocks)
+        entities.add(money)
+        entities.add(mobs_worm)
+        entities.add(mobs_fly)
+        entities.add(money_wins)
+        entities.add(wins)
+        entities.add(table)
+        rungame(left_move, right_move, up_move, damage_mobs)
+
+    elif f_game_go is True and level_2 is True:
+        entities_level_2.add(player)
+        entities_level_2.add(blocks)
+        entities_level_2.add(box)
+        rungame_level_2(left_move, right_move, up_move, damage_mobs, go_attack, collide_ground, return_in_usual)
+
+repeat(menu(game_go))
 
 while True:
-    if menu(game_go) is True:
-        pygame.time.delay(1000)
-        rungame(left_move, right_move, up_move, damage_mobs)
+    if game_completed is True:
+        pygame.time.wait(1000)
+        repeat(menu(game_go))
+    else:
         break
-
-
 
 
