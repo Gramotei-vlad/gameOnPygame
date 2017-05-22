@@ -1,5 +1,5 @@
 # gameOnPygame
-This is simple platformer to wtitten on Python + Pygame + PyAnim.
+This is simple platformer wtitten on Python + Pygame + PyAnim.
 
 Game will be updated.
 
