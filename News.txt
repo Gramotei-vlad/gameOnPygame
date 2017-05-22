@@ -18,4 +18,4 @@ Fixed different bugs and mistakes. (19.05.17)
 
 ---
 Updated program code.
-Players doesn't need to leave from game in order play in game. (22.05.17)
+Players doesn't need to leave from game in order continue to play in game or to play again. (22.05.17)
