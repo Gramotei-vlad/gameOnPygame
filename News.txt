@@ -25,3 +25,8 @@ Players doesn't need to leave from game in order continue to play in game or to 
 
 Updated program code.
 Added third level. (08.06.2017)
+
+-----
+
+Updted program code.
+Added fourth level (without sounds). (17.06.2017)
