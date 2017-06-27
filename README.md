@@ -1,8 +1,12 @@
 # gameOnPygame
 This is simple platformer wtitten on Python + Pygame + PyAnim.
 
-Game will be updated.
+Game is done!
 
-You will play for the yellow character at different levels (at the moment - 4 levels from 5).
+You will play for the different characters at different levels.
+
+In game playing music : Dom Smart - Adventure.
+
+If somebody can compile on Python with help cx-Freeze, do it!
 
 
