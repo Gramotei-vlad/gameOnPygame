@@ -65,6 +65,10 @@ hudCheckMark = pygame.image.load("checkmark.png").convert_alpha()
 hudSettings = pygame.image.load("gear.png").convert_alpha()
 hudPlus = pygame.image.load("plus.png").convert_alpha()
 hudLevel = pygame.image.load("Level.png").convert_alpha()
+hudLevel_2 = pygame.image.load("hudPlayer_beige.png").convert_alpha()
+hudLevel_3 = pygame.image.load("hudPlayer_pink.png").convert_alpha()
+hudLevel_4 = pygame.image.load("hudPlayer_blue.png").convert_alpha()
+hudLevel_5 = pygame.image.load("hudPlayer_green.png").convert_alpha()
 hudNumber1 = pygame.image.load("hud1.png").convert_alpha()
 hudNumber2 = pygame.image.load("hud2.png").convert_alpha()
 hudNumber3 = pygame.image.load("hud3.png").convert_alpha()
@@ -93,8 +97,36 @@ Anim_stay = [("Player.png", 0.1)]
 Anim_jump = [("alienYellow_jump.png", 0.1)]
 Anim_hit = [("AlienYellow_hit.png", 1.0)]
 Anim_climb = [("alienYellow_climb1.png", 0.1), ("alienYellow_climb2.png", 0.1)]
+Anim_swim = [("alienYellow_swim1.png", 1.0), ("alienYellow_swim2.png", 1.0)]
 
 Anim_beige_right = [("alienBeige_walk1.png", 0.1)]
+Anim_beige_stay = [("beige player.png", 0.1)]
+Anim_beige_jump = [("alienBeige_jump.png", 0.1)]
+Anim_beige_hit = [("alienBeige_hit.png", 1.0)]
+Anim_beige_climb = [("alienBeige_climb1.png", 0.1), ("alienBeige_climb2.png", 0.1)]
+Anim_beige_swim = [("alienBeige_swim1.png", 1.0), ("alienBeige_swim2.png", 1.0)]
+
+Anim_pink_right = [("alienPink_walk1.png", 0.1)]
+Anim_pink_stay = [("Pink player.png", 0.1)]
+Anim_pink_jump = [("alienPink_jump.png", 0.1)]
+Anim_pink_hit = [("alienPink_hit.png", 1.0)]
+Anim_pink_climb = [("alienPink_climb1.png", 0.1), ("alienPink_climb2.png", 0.1)]
+Anim_pink_swim = [("alienPink_swim1.png", 1.0), ("alienPink_swim2.png", 1.0)]
+
+Anim_blue_right = [("alienBlue_walk1.png", 0.1)]
+Anim_blue_stay = [("Blue player.png", 0.1)]
+Anim_blue_jump = [("alienBlue_jump.png", 0.1)]
+Anim_blue_hit = [("alienBlue_hit.png", 1.0)]
+Anim_blue_climb = [("alienBlue_climb1.png", 0.1), ("alienBlue_climb2.png", 0.1)]
+Anim_blue_swim = [("alienBlue_swim1.png", 1.0), ("alienBlue_swim2.png", 1.0)]
+
+Anim_green_right = [("alienGreen_walk1.png", 0.1)]
+Anim_green_stay = [("Green player.png", 0.1)]
+Anim_green_jump = [("alienGreen_jump.png", 0.1)]
+Anim_green_hit = [("alienGreen_hit.png", 1.0)]
+Anim_green_climb = [("alienGreen_climb1.png", 0.1), ("alienGreen_climb2.png", 0.1)]
+Anim_green_swim = [("alienGreen_swim1.png", 1.0), ("alienGreen_swim2.png", 1.0)]
+
 
 Anim_worm_dead = [("wormGreen_dead.png", 0.1)]
 Anim_wormPink_dead = [("wormPink_dead.png", 0.1)]
@@ -120,6 +152,7 @@ Anim_door_mid = [("doorOpen_mid.png", 0.1)]
 Anim_door_top = [("doorOpen_top.png", 0.1)]
 Anim_door_mid_2 = [("doorClosed_mid.png", 0.1)]
 Anim_door_top_2 = [("doorClosed_top.png", 0.1)]
+Anim_boss_right = [("right.png", 0.1)]
 
 # Музыка и дополнительные мелочи
 
@@ -219,6 +252,18 @@ number_4_y = 200
 number_5_x = 560
 number_5_y = 200
 
+locked_level_2_x = 330
+locked_level_2_y = 320
+
+locked_level_3_x = 420
+locked_level_3_y = 320
+
+locked_level_4_x = 510
+locked_level_4_y = 320
+
+locked_level_5_x = 600
+locked_level_5_y = 320
+
 select_x = 400
 select_y = 360
 
@@ -238,6 +283,7 @@ clock = pygame.time.Clock()
 pygame.time.delay(3000)
 
 sound_click = pygame.mixer.Sound("Click3.wav")
+locked_click = pygame.mixer.Sound("rollover1.wav")
 wins_music = pygame.mixer.Sound("secosmic_lo.wav")
 hit_worm = pygame.mixer.Sound("punch.wav")
 sound_step = pygame.mixer.Sound("footstep05.ogg")
@@ -246,9 +292,9 @@ explosion = pygame.mixer.Sound("boom.wav")
 switch_1 = pygame.mixer.Sound("switch1.wav")
 switch_button = pygame.mixer.Sound("switch10.wav")
 
-main_music = pyglet.media.Player() # Плеер
-music_1 = pyglet.media.load("Adventure.mp3") # Заглавная музыка 1
-main_music.queue(music_1) # Добавление в плеер и ожидание запуска
+main_music = pyglet.media.Player()  # Плеер
+music_1 = pyglet.media.load("Adventure.mp3")  # Заглавная музыка 1
+main_music.queue(music_1)  # Добавление в плеер и ожидание запуска
 
 fon_music = pyglet.media.Player()
 bee_music = pyglet.media.load("Sound bee.mp3")
@@ -270,6 +316,57 @@ rock_hits = pyglet.media.Player()
 hits_metal = pyglet.media.load("Rock_Hits.wav")
 rock_hits.queue(hits_metal)
 
+horror_music = pyglet.media.Player()
+horror_1 = pyglet.media.load("Horror.wav")
+horror_music.queue(horror_1)
+
+# Изображения главных героев
+image_hero_1 = pygame.image.load("Player.png").convert_alpha()
+image_hero_2 = pygame.image.load("Beige player.png").convert_alpha()
+image_hero_3 = pygame.image.load("Pink player.png").convert_alpha()
+image_hero_4 = pygame.image.load("Blue player.png").convert_alpha()
+image_hero_5 = pygame.image.load("Green player.png").convert_alpha()
+
+# Анимации желтого персонажа
+yellow_anim_right = pyganim.PygAnimation(Anim_right)
+yellow_anim_stay = pyganim.PygAnimation(Anim_stay)
+yellow_anim_hit = pyganim.PygAnimation(Anim_hit)
+yellow_anim_jump = pyganim.PygAnimation(Anim_jump)
+yellow_anim_climb = pyganim.PygAnimation(Anim_climb)
+yellow_anim_swim = pyganim.PygAnimation(Anim_swim)
+
+# Анимации бежевого персонажа
+beige_anim_right = pyganim.PygAnimation(Anim_beige_right)
+beige_anim_stay = pyganim.PygAnimation(Anim_beige_stay)
+beige_anim_hit = pyganim.PygAnimation(Anim_beige_hit)
+beige_anim_jump = pyganim.PygAnimation(Anim_beige_jump)
+beige_anim_climb = pyganim.PygAnimation(Anim_beige_climb)
+beige_anim_swim = pyganim.PygAnimation(Anim_beige_swim)
+
+# Анимации розового персонажа
+pink_anim_right = pyganim.PygAnimation(Anim_pink_right)
+pink_anim_stay = pyganim.PygAnimation(Anim_pink_stay)
+pink_anim_hit = pyganim.PygAnimation(Anim_pink_hit)
+pink_anim_jump = pyganim.PygAnimation(Anim_pink_jump)
+pink_anim_climb = pyganim.PygAnimation(Anim_pink_climb)
+pink_anim_swim = pyganim.PygAnimation(Anim_pink_swim)
+
+# Анимации синего персонажа
+blue_anim_right = pyganim.PygAnimation(Anim_blue_right)
+blue_anim_stay = pyganim.PygAnimation(Anim_blue_stay)
+blue_anim_hit = pyganim.PygAnimation(Anim_blue_hit)
+blue_anim_jump = pyganim.PygAnimation(Anim_blue_jump)
+blue_anim_climb = pyganim.PygAnimation(Anim_blue_climb)
+blue_anim_swim = pyganim.PygAnimation(Anim_blue_swim)
+
+# Анимации зеленого персонажа
+green_anim_right = pyganim.PygAnimation(Anim_green_right)
+green_anim_stay = pyganim.PygAnimation(Anim_green_stay)
+green_anim_hit = pyganim.PygAnimation(Anim_green_hit)
+green_anim_jump = pyganim.PygAnimation(Anim_green_jump)
+green_anim_climb = pyganim.PygAnimation(Anim_green_climb)
+green_anim_swim = pyganim.PygAnimation(Anim_green_swim)
+
 
 # Создание спрайтов
 class Hero(pygame.sprite.Sprite):
@@ -277,13 +374,20 @@ class Hero(pygame.sprite.Sprite):
 
         pygame.sprite.Sprite.__init__(self)
 
-        self.image = pygame.image.load("Player.png").convert_alpha()
+        self.image = image_hero_1
         self.image.set_colorkey(white)
 
         self.rect = self.image.get_rect()
 
         # Здоровье
         self.health = 100
+
+        # Скины персонажа
+        self.yellow = "T"  # На данный момент надет (T == True)
+        self.beige = "F"
+        self.pink = "F"
+        self.blue = "F"
+        self.green = "F"
 
         # Характеристики персонажа
         self.speed = 10
@@ -301,11 +405,18 @@ class Hero(pygame.sprite.Sprite):
         self.onGround = True  # Находимся на земле.
 
         # Загрузка анимации
-        self.AnimationRight = pyganim.PygAnimation(Anim_right)
-        self.AnimationStay = pyganim.PygAnimation(Anim_stay)
-        self.AnimationHit = pyganim.PygAnimation(Anim_hit)
-        self.AnimationJump = pyganim.PygAnimation(Anim_jump)
-        self.AnimationClimb = pyganim.PygAnimation(Anim_climb)
+        self.AnimationRight = yellow_anim_right
+        self.AnimationStay = yellow_anim_stay
+        self.AnimationHit = yellow_anim_hit
+        self.AnimationJump = yellow_anim_jump
+        self.AnimationClimb = yellow_anim_climb
+        self.AnimationSwim = yellow_anim_swim
+
+        # Личные данные
+        self.level_1_completed = "F"
+        self.level_2_completed = "F"
+        self.level_3_completed = "F"
+        self.level_4_completed = "F"
 
     def update(self, left_move, right_move, up_move, damage_mobs):
 
@@ -316,6 +427,12 @@ class Hero(pygame.sprite.Sprite):
             right_move = False
 
         if self.rect.x == 880 and level_2_load is True:
+            right_move = False
+
+        if self.rect.x == 4080 and level_4_load is True:
+            right_move = False
+
+        if self.rect.x == 1880 and level_5_load is True:
             right_move = False
 
         if left_move is True:
@@ -369,9 +486,45 @@ class HeroTwo(pygame.sprite.Sprite):
         self.Animation_right.play()
         self.Animation_right.blit(self.image, (0, 0))
 
+
 AI_player = pygame.sprite.Group()
 beige_player = HeroTwo()
 AI_player.add(beige_player)
+
+
+class Boss(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("alienYellow_front.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.rect.x = 600
+        self.rect.y = 404
+        self.speed = 5
+        self.health = 500
+        self.damage = 10
+        self.kickback = 50
+
+        self.right_move = pyganim.PygAnimation(Anim_boss_right)
+
+    def update(self):
+
+        if yellow_hero.rect.x > self.rect.x:
+            self.right_move.blit(self.image, (0, 0))
+            self.right_move.play()
+
+            self.rect.x += self.speed
+        else:
+            self.rect.x -= self.speed
+
+
+boss_group = pygame.sprite.Group()
+yellow_boss = Boss()
+boss_group.add(yellow_boss)
+
 
 blocks = pygame.sprite.Group()
 blocks_2 = pygame.sprite.Group()
@@ -419,6 +572,7 @@ class Planet(pygame.sprite.Sprite):
         # Расположение
         self.rect.x = 0
         self.rect.y = 570
+
 
 # Печатаем блок уровня!
 change_x = 0
@@ -1406,11 +1560,11 @@ def camera_configure(camera, target_rect):
 total_level_1_width = 4000  # Длина первого уровня
 total_level_1_height = 1000  # Высота первого уровня
 
-total_level_2_width = 1000 # Длина второго уровня
-total_level_2_height = 1000 # Высота второго уровня
+total_level_2_width = 1000  # Длина второго уровня
+total_level_2_height = 1000  # Высота второго уровня
 
-total_level_3_width = 3000 # Длина третьего уровня
-total_level_3_height = 640 # Высота третьего уровня
+total_level_3_width = 3000  # Длина третьего уровня
+total_level_3_height = 640  # Высота третьего уровня
 
 total_level_4_width = 4200
 total_level_4_height = 1000
@@ -1436,9 +1590,57 @@ entities_level_5 = pygame.sprite.Group()
 # Загрузка сохранений
 def load():
     f = open("Save.txt", "r")
-    yellow_hero.count_money = int(f.read(1) + f.read(2))
+    yellow_hero.count_money = int(f.read(3))
     yellow_hero.star = int(f.read(3))
     yellow_hero.amount_bomb = int(f.read(4))
+    yellow_hero.level_1_completed = f.read(1)
+    yellow_hero.level_2_completed = f.read(1)
+    yellow_hero.level_3_completed = f.read(1)
+    yellow_hero.level_4_completed = f.read(1)
+    yellow_hero.yellow = f.read(1)
+    yellow_hero.beige = f.read(1)
+
+    if yellow_hero.beige == "T":
+        yellow_hero.image = image_hero_2
+        yellow_hero.AnimationRight = beige_anim_right
+        yellow_hero.AnimationStay = beige_anim_stay
+        yellow_hero.AnimationJump = beige_anim_jump
+        yellow_hero.AnimationHit = beige_anim_hit
+        yellow_hero.AnimationClimb = beige_anim_climb
+        yellow_hero.AnimationSwim = beige_anim_swim
+
+    yellow_hero.pink = f.read(1)
+
+    if yellow_hero.pink == "T":
+        yellow_hero.image = image_hero_3
+        yellow_hero.AnimationRight = pink_anim_right
+        yellow_hero.AnimationStay = pink_anim_stay
+        yellow_hero.AnimationJump = pink_anim_jump
+        yellow_hero.AnimationHit = pink_anim_hit
+        yellow_hero.AnimationClimb = pink_anim_climb
+        yellow_hero.AnimationSwim = pink_anim_swim
+
+    yellow_hero.blue = f.read(1)
+
+    if yellow_hero.blue == "T":
+        yellow_hero.image = image_hero_4
+        yellow_hero.AnimationRight = blue_anim_right
+        yellow_hero.AnimationStay = blue_anim_stay
+        yellow_hero.AnimationJump = blue_anim_jump
+        yellow_hero.AnimationHit = blue_anim_hit
+        yellow_hero.AnimationClimb = blue_anim_climb
+        yellow_hero.AnimationSwim = blue_anim_swim
+
+    yellow_hero.green = f.read(1)
+
+    if yellow_hero.green == "T":
+        yellow_hero.image = image_hero_5
+        yellow_hero.AnimationRight = green_anim_right
+        yellow_hero.AnimationStay = green_anim_stay
+        yellow_hero.AnimationJump = green_anim_jump
+        yellow_hero.AnimationHit = green_anim_hit
+        yellow_hero.AnimationClimb = green_anim_climb
+        yellow_hero.AnimationSwim = green_anim_swim
     f.close()
 
 load()
@@ -1489,7 +1691,6 @@ def pause():
 
 def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     launch_of_game = True  # Игра запущена!
-    level_1 = True  # Уровень 1 запущен
     confirmation = False  # Бомба не установлена!
     stop_game = False  # Игра не остановлена
     download_bomb = 0  # Количество установленных бомб!
@@ -1571,9 +1772,6 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     if not entities.has(money_gold):
         money_wins.add(money_gold)
         entities.add(money_wins)
-    if not entities.has(star_wins):
-        wins.add(star_wins)
-        entities.add(wins)
 
     while launch_of_game:
 
@@ -1881,6 +2079,8 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
                 # Если прошли уровень и нажали кнопку, то выходим в меню
                 if event.button == 1 and game_completed is True:
+                    yellow_hero.count_money += 10
+                    yellow_hero.level_1_completed = "T"
                     launch_of_game = False
                     menu()
 
@@ -2240,6 +2440,8 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
                                     yellow_key.rect.y = bee.rect.y
 
                 if event.button == 1 and game_completed is True:
+                    yellow_hero.count_money += 10
+                    yellow_hero.level_2_completed = "T"
                     menu()
 
                 if event.button == 1 and dead_player is True:
@@ -2385,14 +2587,14 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
 
         # Победа в игре
         if beige_player.rect.x >= 950:
-            game_completed_2 = True
+            game_completed = True
 
         for event in entities_level_2:
             screen.blit(event.image, camera_2.apply(event))
             camera_2.update(yellow_hero)
 
         if stop_game is False:
-            if dead_player is False and game_completed_2 is False:
+            if dead_player is False and game_completed is False:
                 player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
                 if beige_player_in_game is True and time - time_appear > 200 and time_appear != 0:
                     AI_player.update()
@@ -2555,6 +2757,9 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
         collisions = pygame.sprite.spritecollide(yellow_hero, water_blocks, False)
         if len(collisions) > 0:
+            # Отыгрываем анимацию и уменьшаем скорость
+            yellow_hero.AnimationSwim.blit(yellow_hero.image, (0, 0))
+            yellow_hero.AnimationSwim.play()
             yellow_hero.speed = 5
             player_in_water = True
             if audio_On is True:
@@ -2938,6 +3143,8 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     menu()
 
                 if event.button == 1 and game_completed is True:
+                    yellow_hero.count_money += 15
+                    yellow_hero.level_3_completed = "T"
                     if audio_On is True:
                         fon_music.pause()
                         fon_music_2.pause()
@@ -3236,6 +3443,7 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         if len(collisions) > 0:
             if audio_On is True:
                 wins_music.play()
+            yellow_hero.star += 1
 
         collisions = pygame.sprite.spritecollide(fire, blocks_3, False)
         if len(collisions) > 0:
@@ -3365,6 +3573,8 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
                 # Если прошли уровень и нажали кнопку, то выходим в меню
                 if event.button == 1 and game_completed is True:
+                    yellow_hero.count_money += 20
+                    yellow_hero.level_4_completed = "T"
                     level_4 = False
                     menu()
 
@@ -3483,27 +3693,29 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
         # Игрок не уничтожил камень и вступил в разговор
         if inter_dialog is True and crossing_2 is True and rock_dead is False:
-
-            phraze_1 = ("Hello, my name is Saw")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont8 = pygame.font.SysFont("None", fontsize)
-            fontImage8 = myFont8.render(phraze_1, 0, green)
-
-            phraze_2 = ("I would can to help you if you help me")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont9 = pygame.font.SysFont("None", fontsize)
-            fontImage9 = myFont9.render(phraze_2, 0, green)
-
-            phraze_3 = ("Destroy this rock!")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont10 = pygame.font.SysFont("None", fontsize)
-            fontImage10 = myFont10.render(phraze_3, 0, green)
-
             if time - dialog < 100:
+
+                phraze_1 = ("Hello, my name is Saw")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont8 = pygame.font.SysFont("None", fontsize)
+                fontImage8 = myFont8.render(phraze_1, 0, green)
+
                 screen.blit(fontImage8, (x8, y8))
             if time - dialog > 100 and time - dialog < 200:
+
+                phraze_2 = ("I would can to help you if you help me")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont9 = pygame.font.SysFont("None", fontsize)
+                fontImage9 = myFont9.render(phraze_2, 0, green)
+
                 screen.blit(fontImage9, (x8, y8))
             if time - dialog > 200:
+
+                phraze_3 = ("Destroy this rock!")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont10 = pygame.font.SysFont("None", fontsize)
+                fontImage10 = myFont10.render(phraze_3, 0, green)
+
                 screen.blit(fontImage10, (x8, y8))
 
         # Игрок уничтожил камень и вступил в разговор
@@ -3517,35 +3729,35 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
         # После 1 выполненного квеста
         if task_1 is True and crossing_2 is True and inter_dialog is True and fly_death == 0:
-            phraze_5 = ("That fly cause irritation")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont10 = pygame.font.SysFont("None", fontsize)
-            fontImage12 = myFont10.render(phraze_5, 0, green)
-
-            phraze_6 = ("Climb up and destroy him")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont10 = pygame.font.SysFont("None", fontsize)
-            fontImage13 = myFont10.render(phraze_6, 0, green)
-
             if time - dialog <= 100:
+                phraze_5 = ("That fly cause irritation")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont10 = pygame.font.SysFont("None", fontsize)
+                fontImage12 = myFont10.render(phraze_5, 0, green)
+
                 screen.blit(fontImage12, (x8, y8))
             else:
+                phraze_6 = ("Climb up and destroy him")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont10 = pygame.font.SysFont("None", fontsize)
+                fontImage13 = myFont10.render(phraze_6, 0, green)
+
                 screen.blit(fontImage13, (x8, y8))
 
         if task_1 is True and crossing_2 is True and inter_dialog is True and fly_death != 0 and task_2 is False:
-            phraze_7 = ("Thank you. It does not bother me")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont10 = pygame.font.SysFont("None", fontsize)
-            fontImage14 = myFont10.render(phraze_7, 0, green)
-
-            phraze_8 = ("I will open door you!")
-            (x8, y8, fontsize) = (480, 320, 30)
-            myFont10 = pygame.font.SysFont("None", fontsize)
-            fontImage15 = myFont10.render(phraze_8, 0, green)
-
             if time - dialog <= 100:
+                phraze_7 = ("Thank you. It does not bother me")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont10 = pygame.font.SysFont("None", fontsize)
+                fontImage14 = myFont10.render(phraze_7, 0, green)
+
                 screen.blit(fontImage14, (x8, y8))
             if time - dialog > 100 and time - dialog <= 200:
+                phraze_8 = ("I will open door you!")
+                (x8, y8, fontsize) = (480, 320, 30)
+                myFont10 = pygame.font.SysFont("None", fontsize)
+                fontImage15 = myFont10.render(phraze_8, 0, green)
+
                 screen.blit(fontImage15, (x8, y8))
             if time - dialog > 200:
                 saw_1.rect.x = 3400
@@ -3609,15 +3821,31 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     download_bomb = 0  # Количество установленных бомб!
     dead_player = False  # Игрок не умер
     game_completed = False  # Уровень не пройден
+    yellow_boss_death = False  # Босс не убит
+    time_explosion = 0  # Время взрыва
     time = 0  # Время игры
 
     yellow_hero.health = 100
     yellow_hero.rect.x = 20
     yellow_hero.rect.y = 314
 
+    yellow_boss.health = 300
+    yellow_boss.rect.x = 600
+    yellow_boss.rect.y = 404
+
+    exit_level.rect.x = 1880
+    exit_level.rect.y = 450
+
     if not entities_level_5.has(yellow_hero):
         player.add(yellow_hero)
         entities_level_5.add(player)
+
+    if not entities_level_5.has(yellow_boss):
+        boss_group.add(yellow_boss)
+        entities_level_5.add(boss_group)
+
+    if entities_level_5.has(exit_level):
+        entities_level_5.remove(table)
 
     while level_5:
 
@@ -3637,6 +3865,34 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         (x5, y5, fontsize) = (770, 170, 45)
         myFont5 = pygame.font.SysFont("None", fontsize)
         fontImage5 = myFont5.render(no_bomb, 0, green)
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, planet_group, False)
+        if len(collisions) > 0:
+            yellow_hero.onGround = True
+            yellow_hero.drop = 0
+        else:
+            yellow_hero.onGround = False
+            yellow_hero.drop = 5
+            yellow_hero.rect.y += yellow_hero.drop
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, boss_group, False)
+        if len(collisions) > 0:
+            if audio_On is True:
+                hit_worm.play()
+            yellow_hero.health -= yellow_boss.damage
+
+            if yellow_boss.rect.x > yellow_hero.rect.x:
+                yellow_hero.rect.x -= yellow_boss.kickback
+            else:
+                yellow_hero.rect.x += yellow_boss.kickback
+
+            if yellow_hero.health <= 0:
+                dead_player = True
+
+        if yellow_boss_death is True:
+            collisions = pygame.sprite.spritecollide(exit_level, player, True)
+            if len(collisions) > 0:
+                game_completed = True
 
         for x_3 in range(pause_x, pause_x + 30):
             for y_3 in range(pause_y, pause_y + 30):
@@ -3679,15 +3935,31 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                         explosion.play()
                     confirmation = False
 
+                    for x in range(bomb.rect.x - 230, bomb.rect.x + 230):
+                        for y in range(bomb.rect.y - 130, bomb.rect.y + 130):
+                            if x == yellow_boss.rect.x and y == yellow_boss.rect.y:
+                                yellow_boss.health -= bomb.damage
+                                yellow_boss.speed = 2
+                                time_explosion = time
+
+                                if yellow_boss.health <= 0:
+                                    yellow_hero.count_money += 30
+                                    yellow_boss_death = True
+                                    entities_level_5.add(table)
+                                    yellow_boss.kill()
+
                 if event.button == 1 and crossing is True:
                     if audio_On is True:
                         sound_click.play()
                     stop_game = True
 
                 if event.button == 1 and game_completed is True:
+                    horror_music.pause()
+                    yellow_hero.count_money += 25
                     menu()
 
                 if event.button == 1 and dead_player is True:
+                    horror_music.pause()
                     menu()
 
             if event.type == KEYDOWN:
@@ -3712,6 +3984,9 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     f_left_move = False
                 if event.key == K_UP:
                     f_up_move = False
+
+        if time - time_explosion > 100 and time_explosion != 0:
+            yellow_boss.speed = 5
 
         screen.blit(background_color_4, (0, 0))
         screen.blit(hudCoin_trans, (800, 10))
@@ -3774,11 +4049,16 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         if stop_game is False:
             if dead_player is False:
                 player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
+                boss_group.update()
+
+            if audio_On is True:
+                horror_music.play()
 
             time += 1
             pygame.display.update()
 
         else:
+            horror_music.pause()
             pause()
 
 
@@ -3788,22 +4068,26 @@ def menu():
     global level_1_load
     global level_2_load
     global level_3_load
+    global level_4_load
+    global level_5_load
     global music_On
     audio_On = True  # Музыка включена
     level_1_load = False  # Уровень 1 не запущен
     level_2_load = False  # Уровень 2 не запущен
-    level_3_load = False # Уровень 3 не запущен
+    level_3_load = False  # Уровень 3 не запущен
+    level_4_load = False  # Уровень 4 не запущен
+    level_5_load = False  # Уровень 5 не запущен
     menu_load = False  # Всплывающее меню
     fullScreen = False  # Полноэкранный режим
-    music_On = False  # Музыка не включена
+    music_On = True  # Музыка включена
     shop_load = False  # Магазин не открыт
     settings = False  # Настройки не включены
     shop_character = False  # Покупка персонажей в магазине не выбрана
     shop_tools = False  # Покупка инстументов не выбрана
     increase_bomb = False  # Не покупаем бомбы
     level_select = False  # Выбор уровня
-    price_bomb = 5 # Цена за бомбу
-    save = False # Игрок не нажал кнопку сохранения
+    price_bomb = 5  # Цена за бомбу
+    save = False  # Игрок не нажал кнопку сохранения
 
     while lobby is True:
 
@@ -3829,6 +4113,11 @@ def menu():
         crossing_20 = False  # Нет пересечения с кнопкой третьего уровня
         crossing_21 = False  # Нет пересечения с кнопкой четвертого уровня
         crossing_22 = False  # Нет пересечения с кнопкой пятого уровня
+        crossing_23 = False  # Нет пересечения с кнопкой выбора бежевого персонажа
+        crossing_24 = False  # Нет пересечения с кнопкой выбора желтого персонажа
+        crossing_25 = False  # Нет пересечения с кнопкой выбора розового персонажа
+        crossing_26 = False  # Нет пересечения с кнопкой выбора синего персонажа
+        crossing_27 = False  # Нет пересечения с кнопкой выбора зеленого персонажа
 
         no_bomb = (str(yellow_hero.amount_bomb))
         (x6, y6, fontsize) = (540, 310, 45)
@@ -4026,6 +4315,46 @@ def menu():
                 if pos_x == x_3 and pos_y == y_3:
                     crossing_22 = True
 
+        for x_3 in range(beigePlayer_x, beigePlayer_x + 105):
+            for y_3 in range(beigePlayer_y, beigePlayer_y + 240):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_23 = True
+
+        for x_3 in range(yellowPlayer_x, yellowPlayer_x + 105):
+            for y_3 in range(yellowPlayer_y, yellowPlayer_y + 240):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_24 = True
+
+        for x_3 in range(pinkPlayer_x, pinkPlayer_x + 105):
+            for y_3 in range(pinkPlayer_y, pinkPlayer_y + 240):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_25 = True
+
+        for x_3 in range(bluePlayer_x, bluePlayer_x + 105):
+            for y_3 in range(bluePlayer_y, bluePlayer_y + 240):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_26 = True
+
+        for x_3 in range(greenPlayer_x, greenPlayer_x + 105):
+            for y_3 in range(greenPlayer_y, greenPlayer_y + 240):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_27 = True
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -4034,16 +4363,55 @@ def menu():
                 if event.button == 1 and crossing is True and shop_load is False and level_select is False:
                     if audio_On is True:
                         switch_button.play()
-                    level_1_load = True
-                    entities.add(player)
-                    entities.add(blocks)
-                    entities.add(money)
-                    entities.add(mobs_worm)
-                    entities.add(mobs_fly)
-                    entities.add(money_wins)
-                    entities.add(wins)
-                    entities.add(table)
-                    rungame(left_move, right_move, up_move, damage_mobs)
+                    if yellow_hero.level_2_completed == "F":
+                        level_1_load = True
+                        entities.add(player)
+                        entities.add(blocks)
+                        entities.add(money)
+                        entities.add(mobs_worm)
+                        entities.add(mobs_fly)
+                        entities.add(money_wins)
+                        entities.add(wins)
+                        entities.add(table)
+                        rungame(left_move, right_move, up_move, damage_mobs)
+                    elif yellow_hero.level_3_completed == "F" and yellow_hero.level_2_completed == "T":
+                        level_2_load = True
+                        entities_level_2.add(player)
+                        entities_level_2.add(blocks)
+                        entities_level_2.add(box)
+                        rungame_level_2(left_move, right_move, up_move, damage_mobs, go_attack, collide_ground, return_in_usual)
+                    elif yellow_hero.level_4_completed == "F" and yellow_hero.level_3_completed == "T":
+                        level_3_load = True
+                        entities_level_3.add(player)
+                        entities_level_3.add(water_blocks)
+                        entities_level_3.add(blocks_2)
+                        entities_level_3.add(swim_mobs)
+                        entities_level_3.add(stone_group)
+                        entities_level_3.add(table)
+                        entities_level_3.add(money_2)
+                        entities_level_3.add(money_wins)
+                        entities_level_3.add(game_box)
+                        rungame_level_3(left_move, right_move, up_move, damage_mobs)
+                    elif yellow_hero.level_4_completed == "T" and yellow_hero.star < 3:
+                        level_4_load = True
+                        entities_level_4.add(player)
+                        entities_level_4.add(blocks_3)
+                        entities_level_4.add(neutral_mobs)
+                        entities_level_4.add(lava_blocks)
+                        entities_level_4.add(stone_group)
+                        entities_level_4.add(wins)
+                        entities_level_4.add(cliff_group)
+                        entities_level_4.add(mobs_fly)
+                        entities_level_4.add(door_group)
+                        entities_level_4.add(ladder_group)
+                        entities_level_4.add(table)
+                        rungame_level_4(left_move, right_move, up_move, damage_mobs)
+                    else:
+                        level_5_load = True
+                        entities_level_5.add(player)
+                        entities_level_5.add(planet_group)
+                        entities_level_5.add(boss_group)
+                        rungame_level_5(left_move, right_move, up_move, damage_mobs)
 
                 if event.button == 1 and crossing_2 is True and settings is True:
                     if audio_On is True:
@@ -4144,13 +4512,17 @@ def menu():
                     level_select = False
 
                 if event.button == 1 and crossing_18 is True and level_select is True:
-                    if audio_On is True:
-                        switch_button.play()
-                    level_2_load = True
-                    entities_level_2.add(player)
-                    entities_level_2.add(blocks)
-                    entities_level_2.add(box)
-                    rungame_level_2(left_move, right_move, up_move, damage_mobs, go_attack, collide_ground, return_in_usual)
+                    if yellow_hero.level_1_completed == "T":
+                        if audio_On is True:
+                            switch_button.play()
+                        level_2_load = True
+                        entities_level_2.add(player)
+                        entities_level_2.add(blocks)
+                        entities_level_2.add(box)
+                        rungame_level_2(left_move, right_move, up_move, damage_mobs, go_attack, collide_ground, return_in_usual)
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
 
                 if event.button == 1 and crossing_19 is True and menu_load is True:
                     if audio_On is True:
@@ -4172,45 +4544,169 @@ def menu():
                         f.write(str("0") + str(yellow_hero.amount_bomb))
                     else:
                         f.write(str(yellow_hero.amount_bomb))
+
+                    # Записываем пройденные уровни
+                    f.write(str("\n"))
+                    f.write(str("\n"))
+                    f.write(yellow_hero.level_1_completed)
+                    f.write(yellow_hero.level_2_completed)
+                    f.write(yellow_hero.level_3_completed)
+                    f.write(yellow_hero.level_4_completed)
+                    f.write(yellow_hero.yellow)
+                    f.write(yellow_hero.beige)
+                    f.write(yellow_hero.pink)
+                    f.write(yellow_hero.blue)
+                    f.write(yellow_hero.green)
                     f.close()
 
                 if event.button == 1 and level_select is True and crossing_20 is True:
-                    if audio_On is True:
-                        switch_button.play()
-                    level_3_load = True
-                    entities_level_3.add(player)
-                    entities_level_3.add(water_blocks)
-                    entities_level_3.add(blocks_2)
-                    entities_level_3.add(swim_mobs)
-                    entities_level_3.add(stone_group)
-                    entities_level_3.add(table)
-                    entities_level_3.add(money_2)
-                    entities_level_3.add(money_wins)
-                    entities_level_3.add(game_box)
-                    rungame_level_3(left_move, right_move, up_move, damage_mobs)
+                    if yellow_hero.level_2_completed == "T":
+                        if audio_On is True:
+                            switch_button.play()
+                        level_3_load = True
+                        entities_level_3.add(player)
+                        entities_level_3.add(water_blocks)
+                        entities_level_3.add(blocks_2)
+                        entities_level_3.add(swim_mobs)
+                        entities_level_3.add(stone_group)
+                        entities_level_3.add(table)
+                        entities_level_3.add(money_2)
+                        entities_level_3.add(money_wins)
+                        entities_level_3.add(game_box)
+                        rungame_level_3(left_move, right_move, up_move, damage_mobs)
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
 
                 if event.button == 1 and level_select is True and crossing_21 is True:
-                    if audio_On is True:
-                        switch_button.play()
-                    entities_level_4.add(player)
-                    entities_level_4.add(blocks_3)
-                    entities_level_4.add(neutral_mobs)
-                    entities_level_4.add(lava_blocks)
-                    entities_level_4.add(stone_group)
-                    entities_level_4.add(wins)
-                    entities_level_4.add(cliff_group)
-                    entities_level_4.add(mobs_fly)
-                    entities_level_4.add(door_group)
-                    entities_level_4.add(ladder_group)
-                    entities_level_4.add(table)
-                    rungame_level_4(left_move, right_move, up_move, damage_mobs)
+                    if yellow_hero.level_3_completed == "T":
+                        if audio_On is True:
+                            switch_button.play()
+                        level_4_load = True
+                        entities_level_4.add(player)
+                        entities_level_4.add(blocks_3)
+                        entities_level_4.add(neutral_mobs)
+                        entities_level_4.add(lava_blocks)
+                        entities_level_4.add(stone_group)
+                        entities_level_4.add(wins)
+                        entities_level_4.add(cliff_group)
+                        entities_level_4.add(mobs_fly)
+                        entities_level_4.add(door_group)
+                        entities_level_4.add(ladder_group)
+                        entities_level_4.add(table)
+                        rungame_level_4(left_move, right_move, up_move, damage_mobs)
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
 
                 if event.button == 1 and level_select is True and crossing_22 is True:
+                    if yellow_hero.level_4_completed == "T" and yellow_hero.star >= 3:
+                        if audio_On is True:
+                            switch_button.play()
+                        level_5_load = True
+                        entities_level_5.add(player)
+                        entities_level_5.add(planet_group)
+                        entities_level_5.add(boss_group)
+                        rungame_level_5(left_move, right_move, up_move, damage_mobs)
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
+
+                if event.button == 1 and shop_character is True and crossing_23 is True:
+                    if yellow_hero.level_2_completed == "T":
+                        yellow_hero.beige = "T"
+                        yellow_hero.yellow = "F"
+                        yellow_hero.pink = "F"
+                        yellow_hero.blue = "F"
+                        yellow_hero.green = "F"
+                        if audio_On is True:
+                            switch_button.play()
+                        yellow_hero.image = image_hero_2
+                        yellow_hero.AnimationRight = beige_anim_right
+                        yellow_hero.AnimationStay = beige_anim_stay
+                        yellow_hero.AnimationJump = beige_anim_jump
+                        yellow_hero.AnimationHit = beige_anim_hit
+                        yellow_hero.AnimationClimb = beige_anim_climb
+                        yellow_hero.AnimationSwim = beige_anim_swim
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
+
+                if event.button == 1 and shop_character is True and crossing_24 is True:
+                    yellow_hero.yellow = "T"
+                    yellow_hero.beige = "F"
+                    yellow_hero.pink = "F"
+                    yellow_hero.blue = "F"
+                    yellow_hero.green = "F"
                     if audio_On is True:
                         switch_button.play()
-                    entities_level_5.add(player)
-                    entities_level_5.add(planet_group)
-                    rungame_level_5(left_move, right_move, up_move, damage_mobs)
+                    yellow_hero.image = image_hero_1
+                    yellow_hero.AnimationRight = yellow_anim_right
+                    yellow_hero.AnimationStay = yellow_anim_stay
+                    yellow_hero.AnimationJump = yellow_anim_jump
+                    yellow_hero.AnimationHit = yellow_anim_hit
+                    yellow_hero.AnimationClimb = yellow_anim_climb
+                    yellow_hero.AnimationSwim = yellow_anim_swim
+
+                if event.button == 1 and shop_character is True and crossing_25 is True:
+                    if yellow_hero.level_3_completed == "T":
+                        yellow_hero.pink = "T"
+                        yellow_hero.beige = "F"
+                        yellow_hero.yellow = "F"
+                        yellow_hero.blue = "F"
+                        yellow_hero.green = "F"
+                        if audio_On is True:
+                            switch_button.play()
+                        yellow_hero.image = image_hero_3
+                        yellow_hero.AnimationRight = pink_anim_right
+                        yellow_hero.AnimationStay = pink_anim_stay
+                        yellow_hero.AnimationJump = pink_anim_jump
+                        yellow_hero.AnimationHit = pink_anim_hit
+                        yellow_hero.AnimationClimb = pink_anim_climb
+                        yellow_hero.AnimationSwim = pink_anim_swim
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
+
+                if event.button == 1 and shop_load is True and crossing_26 is True:
+                    if yellow_hero.level_4_completed == "T":
+                        yellow_hero.blue = "T"
+                        yellow_hero.beige = "F"
+                        yellow_hero.yellow = "F"
+                        yellow_hero.pink = "F"
+                        yellow_hero.green = "F"
+                        if audio_On is True:
+                            switch_button.play()
+                        yellow_hero.image = image_hero_4
+                        yellow_hero.AnimationRight = blue_anim_right
+                        yellow_hero.AnimationStay = blue_anim_stay
+                        yellow_hero.AnimationJump = blue_anim_jump
+                        yellow_hero.AnimationHit = blue_anim_hit
+                        yellow_hero.AnimationClimb = blue_anim_climb
+                        yellow_hero.AnimationSwim = blue_anim_swim
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
+
+                if event.button == 1 and shop_load is True and crossing_27 is True:
+                    if yellow_hero.star >= 3 and yellow_hero.count_money >= 40:
+                        yellow_hero.green = "T"
+                        yellow_hero.beige = "F"
+                        yellow_hero.yellow = "F"
+                        yellow_hero.pink = "F"
+                        yellow_hero.blue = "F"
+                        if audio_On is True:
+                            switch_button.play()
+                        yellow_hero.image = image_hero_5
+                        yellow_hero.AnimationRight = green_anim_right
+                        yellow_hero.AnimationStay = green_anim_stay
+                        yellow_hero.AnimationJump = green_anim_jump
+                        yellow_hero.AnimationHit = green_anim_hit
+                        yellow_hero.AnimationClimb = green_anim_climb
+                        yellow_hero.AnimationSwim = green_anim_swim
+                    else:
+                        if audio_On is True:
+                            locked_click.play()
 
         clock.tick(40)
 
@@ -4220,7 +4716,18 @@ def menu():
             screen.blit(fontImage, (x, y))
         else:
             screen.blit(fontImage, (x - 9, y))
-        screen.blit(hudLevel, (level_x, level_y))
+
+        if yellow_hero.yellow == "T":
+            screen.blit(hudLevel, (level_x, level_y))
+        elif yellow_hero.beige == "T":
+            screen.blit(hudLevel_2, (level_x, level_y))
+        elif yellow_hero.pink == "T":
+            screen.blit(hudLevel_3, (level_x, level_y))
+        elif yellow_hero.blue == "T":
+            screen.blit(hudLevel_4, (level_x, level_y))
+        else:
+            screen.blit(hudLevel_5, (level_x, level_y))
+
         screen.blit(hudStar_trans, (600, -3))
         screen.blit(fontImage9, (x4, y4))
 
@@ -4243,6 +4750,18 @@ def menu():
             screen.blit(hudNumber5, (number_5_x, number_5_y))
             screen.blit(hudQuitX, (quitX_x, quitX_y))
 
+            if yellow_hero.level_1_completed == "F":
+                screen.blit(hudLockedPlayer, (locked_level_2_x, locked_level_2_y))
+
+            if yellow_hero.level_2_completed == "F":
+                screen.blit(hudLockedPlayer, (locked_level_3_x, locked_level_3_y))
+
+            if yellow_hero.level_3_completed == "F":
+                screen.blit(hudLockedPlayer, (locked_level_4_x, locked_level_4_y))
+
+            if yellow_hero.level_4_completed == "F" or yellow_hero.star < 3:
+                screen.blit(hudLockedPlayer, (locked_level_5_x, locked_level_5_y))
+
         if settings is True:
             if fullScreen is True:
                 screen.blit(hudWindow, (fullScreen_x, fullScreen_y))
@@ -4259,7 +4778,7 @@ def menu():
                 main_music.pause()
             else:
                 screen.blit(hudMusic_on, (music_x, music_y))
-                if audio_On is True:
+                if audio_On is True and main_music.playing is False:
                     main_music.play()
                 else:
                     main_music.pause()
@@ -4284,11 +4803,26 @@ def menu():
                 screen.blit(hudBluePlayer, (bluePlayer_x, bluePlayer_y))
                 screen.blit(hudBeigePlayer, (beigePlayer_x, beigePlayer_y))
                 screen.blit(hudPinkPlayer, (pinkPlayer_x, pinkPlayer_y))
-                screen.blit(hudLockedPlayer, (locked_x, locked_y))
-                screen.blit(hudLockedPlayer, (locked_x + 130, locked_y))
-                screen.blit(hudLockedPlayer, (locked_x + 260, locked_y))
-                screen.blit(hudLockedPlayer, (locked_x + 390, locked_y))
-                screen.blit(hudCheckMark, (check_x, check_y))
+
+                if yellow_hero.level_2_completed == "F":
+                    screen.blit(hudLockedPlayer, (locked_x, locked_y))
+                if yellow_hero.level_3_completed == "F":
+                    screen.blit(hudLockedPlayer, (locked_x + 130, locked_y))
+                if yellow_hero.level_4_completed == "F":
+                    screen.blit(hudLockedPlayer, (locked_x + 260, locked_y))
+                if yellow_hero.star < 3:
+                    screen.blit(hudLockedPlayer, (locked_x + 390, locked_y))
+
+                if yellow_hero.yellow == "T":
+                    screen.blit(hudCheckMark, (check_x, check_y))
+                elif yellow_hero.beige == "T":
+                    screen.blit(hudCheckMark, (check_x + 130, check_y))
+                elif yellow_hero.pink == "T":
+                    screen.blit(hudCheckMark, (check_x + 260, check_y))
+                elif yellow_hero.blue == "T":
+                    screen.blit(hudCheckMark, (check_x + 390, check_y))
+                else:
+                    screen.blit(hudCheckMark, (check_x + 520, check_y))
             elif shop_tools is True:
                 screen.blit(hudBomb, (bomb_x, bomb_y - 100))
                 screen.blit(hudPlus, (plus_x, plus_y))
@@ -4321,10 +4855,13 @@ def menu():
             screen.blit(fontImage10, (x5, y5))
             if menu_load is False or shop_load is True or settings is True:
                 save = False
+
+        if audio_On is True and music_On is True:
+            main_music.play()
+        else:
+            main_music.pause()
+
         pygame.display.update()
 
 
 menu()
-
-
-
