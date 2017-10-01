@@ -38,3 +38,8 @@ Game was optimized. (18.06.2017)
 ----
 
 The game is done on 100 %. (26.06.2017)
+
+------
+
+Added system of personal records.
+Fixed bugs. (01.10.2017)
