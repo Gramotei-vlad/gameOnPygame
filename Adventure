@@ -9,6 +9,7 @@ pygame.init()
 window_width = 896
 window_height = 640
 flags = 0  # Оконный или полноэкранный режим
+music_On = True  # Музыка включена
 screen = pygame.display.set_mode((window_width, window_height), flags, 32)
 
 
@@ -50,7 +51,7 @@ hudFullcreen = pygame.image.load("larger.png").convert_alpha()
 hudMenu = pygame.image.load("menuList.png").convert_alpha()
 hudShop = pygame.image.load("cart.png").convert_alpha()
 hudWindow = pygame.image.load("smaller.png").convert_alpha()
-hudTrophy = pygame.image.load("trophy (2).png").convert_alpha()
+hudTrophy = pygame.image.load("trophy.png").convert_alpha()
 hudQuit = pygame.image.load("power.png").convert_alpha()
 hudMusic_on = pygame.image.load("musicOn.png").convert_alpha()
 hudMusic_off = pygame.image.load("musicOff.png").convert_alpha()
@@ -393,6 +394,7 @@ class Hero(pygame.sprite.Sprite):
         self.speed = 10
         self.jump = 250
         self.drop = 50
+        self.score = 0
 
         # Инвентарь
         self.count_money = 0
@@ -403,6 +405,13 @@ class Hero(pygame.sprite.Sprite):
         self.rect.x = 20
         self.rect.y = 314
         self.onGround = True  # Находимся на земле.
+
+        # Рекорды
+        self.records_of_level_1 = 0
+        self.records_of_level_2 = 0
+        self.records_of_level_3 = 0
+        self.records_of_level_4 = 0
+        self.records_of_level_5 = 0
 
         # Загрузка анимации
         self.AnimationRight = yellow_anim_right
@@ -1641,6 +1650,12 @@ def load():
         yellow_hero.AnimationHit = green_anim_hit
         yellow_hero.AnimationClimb = green_anim_climb
         yellow_hero.AnimationSwim = green_anim_swim
+
+    yellow_hero.records_of_level_1 = int(f.read(3))
+    yellow_hero.records_of_level_2 = int(f.read(3))
+    yellow_hero.records_of_level_3 = int(f.read(3))
+    yellow_hero.records_of_level_4 = int(f.read(3))
+    yellow_hero.records_of_level_5 = int(f.read(3))
     f.close()
 
 load()
@@ -1711,6 +1726,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     yellow_hero.health = 100  # Обновляем значение здоровья
     yellow_hero.rect.x = 20  # Обновляем координаты х
     yellow_hero.rect.y = 314  # Обновляем координату y
+    yellow_hero.score = 0  # Обновляем счетчик
 
     # Обновляем характеристики червя
     worm.health = 100
@@ -1814,6 +1830,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= worm.kickback
                 yellow_hero.health -= worm.damage
 
+            if yellow_hero.score - 1 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             if yellow_hero.health <= 0:
                 dead_player = True
 
@@ -1832,6 +1853,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             elif yellow_hero.rect.x <= worm_pink.rect.x:
                 yellow_hero.rect.x -= worm_pink.kickback
                 yellow_hero.health -= worm_pink.damage
+
+            if yellow_hero.score - 1 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1852,6 +1878,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= mouse.kickback
                 yellow_hero.health -= mouse.damage
 
+            if yellow_hero.score - 1 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             if yellow_hero.health <= 0:
                 dead_player = True
 
@@ -1870,6 +1901,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             elif yellow_hero.rect.x < mouse_2.rect.x:
                 yellow_hero.rect.x -= mouse_2.kickback
                 yellow_hero.health -= mouse_2.damage
+
+            if yellow_hero.score - 1 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1932,6 +1968,10 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= fly.kickback
 
             yellow_hero.health -= fly.damage
+            if yellow_hero.score - 3 > 0:
+                yellow_hero.score -= 3
+            else:
+                yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1945,6 +1985,12 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         if len(collisions) > 0:
             if audio_On is True:
                 hit_worm.play()
+
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             yellow_hero.health -= 10
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -2010,6 +2056,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                 worm.rect.x += bomb.kickback
 
                             yellow_hero.count_money += 1
+                            yellow_hero.score += 1
                             time_death = time
                             worm.speed = 0
                             worm.damage = 0
@@ -2027,6 +2074,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                 worm_pink.rect.x += bomb.kickback
 
                             yellow_hero.count_money += 1
+                            yellow_hero.score += 1
                             time_death_2 = time
                             worm_pink.speed = 0
                             worm_pink.damage = 0
@@ -2045,6 +2093,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                 mouse.rect.x += bomb.kickback
 
                             yellow_hero.count_money += 2
+                            yellow_hero.score += 3
                             time_death_3 = time
                             mouse.speed = 0
                             mouse.damage = 0
@@ -2063,6 +2112,7 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                 mouse_2.rect.x += bomb.kickback
 
                             yellow_hero.count_money += 2
+                            yellow_hero.score += 3
                             time_death_4 = time
                             mouse_2.speed = 0
                             mouse_2.damage = 0
@@ -2147,11 +2197,26 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
         if game_completed is True:
 
             inscription_wins = ("Congratulations! You wins! Press any key")
-            (x6, y6, fontsize6) = (100, 300, 30)
+            (x6, y6, fontsize6) = (150, 300, 30)
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage6 = myFont6.render(inscription_wins, 0, green)
 
+            score = ("Your score: " + str(yellow_hero.score))
+            (x7, y7, fontsize6) = (150, 350, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage7 = myFont6.render(score, 0, green)
+
+            if yellow_hero.score > yellow_hero.records_of_level_1:
+                yellow_hero.records_of_level_1 = yellow_hero.score
+
+            record = ("Your record: " + str(yellow_hero.records_of_level_1))
+            (x8, y8, fontsize6) = (150, 400, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage8 = myFont6.render(record, 0, green)
+
             screen.blit(fontImage6, (x6, y6))
+            screen.blit(fontImage7, (x7, y7))
+            screen.blit(fontImage8, (x8, y8))
         if dead_player is True:
 
             dead_text = ("You were killed! Press any key!")
@@ -2223,6 +2288,7 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
     yellow_hero.health = 100  # Обновляем значение здоровья
     yellow_hero.rect.x = 20  # Обновляем координаты х
     yellow_hero.rect.y = 314  # Обновляем координату y
+    yellow_hero.score = 10  # Обновляем счетчик
 
     bee.health = 255
     bee.rect.x = 800
@@ -2341,6 +2407,11 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
                     yellow_hero.rect.x -= bee.kickback
                 else:
                     bee.kickback = 0
+
+            if yellow_hero.score - 3 > 0:
+                yellow_hero.score -= 3
+            else:
+                yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -2544,7 +2615,22 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage6 = myFont6.render(inscription_wins, 0, green)
 
+            score = ("Your score: " + str(yellow_hero.score))
+            (x7, y7, fontsize6) = (150, 350, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage7 = myFont6.render(score, 0, green)
+
+            if yellow_hero.score > yellow_hero.records_of_level_2:
+                yellow_hero.records_of_level_2 = yellow_hero.score
+
+            record = ("Your record: " + str(yellow_hero.records_of_level_2))
+            (x8, y8, fontsize6) = (150, 400, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage8 = myFont6.render(record, 0, green)
+
             screen.blit(fontImage6, (x6, y6))
+            screen.blit(fontImage7, (x7, y7))
+            screen.blit(fontImage8, (x8, y8))
 
         if time > 500 and bee_death is False:
             bee_in_game = True
@@ -2646,6 +2732,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     yellow_hero.rect.x = 0
     yellow_hero.rect.y = 100
     yellow_hero.health = 100
+    yellow_hero.score = 0
 
     fish_1.health = 100
     fish_1.speed = 12
@@ -2825,6 +2912,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_1.kickback
 
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             yellow_hero.health -= fish_1.damage
 
             if yellow_hero.health <= 0:
@@ -2839,6 +2931,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x += fish_2.kickback
             else:
                 yellow_hero.rect.x -= fish_2.kickback
+
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
 
             yellow_hero.health -= fish_2.damage
 
@@ -2855,6 +2952,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_3.kickback
 
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             yellow_hero.health -= fish_3.damage
 
             if yellow_hero.health <= 0:
@@ -2870,6 +2972,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_4.kickback
 
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             yellow_hero.health -= fish_4.damage
 
             if yellow_hero.health <= 0:
@@ -2884,6 +2991,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x += green_fish_1.kickback
             else:
                 yellow_hero.rect.x -= green_fish_1.kickback
+
+            if yellow_hero.score - 3 > 0:
+                yellow_hero.score -= 3
+            else:
+                yellow_hero.score = 0
 
             yellow_hero.health -= green_fish_1.damage
 
@@ -3016,6 +3128,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_1.kickback = 0
                                         fish_1_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_1, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3031,6 +3144,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_2.kickback = 0
                                         fish_2_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_2, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3046,6 +3160,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_3.kickback = 0
                                         fish_3_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_3, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3061,6 +3176,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_4.kickback = 0
                                         fish_4_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_4, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3078,6 +3194,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_1.kickback = 0
                                         fish_1_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_1, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3093,6 +3210,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_2.kickback = 0
                                         fish_2_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_2, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3108,6 +3226,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_3.kickback = 0
                                         fish_3_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_3, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3123,6 +3242,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                                         fish_4.kickback = 0
                                         fish_4_death = time
                                         yellow_hero.count_money += 3
+                                        yellow_hero.score += 2
 
                                         collisions = pygame.sprite.spritecollide(fish_4, water_blocks, False)
                                         if len(collisions) == 0:
@@ -3245,7 +3365,22 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage6 = myFont6.render(inscription_wins, 0, green)
 
+            score = ("Your score: " + str(yellow_hero.score))
+            (x7, y7, fontsize6) = (150, 350, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage7 = myFont6.render(score, 0, green)
+
+            if yellow_hero.score > yellow_hero.records_of_level_3:
+                yellow_hero.records_of_level_3 = yellow_hero.score
+
+            record = ("Your record: " + str(yellow_hero.records_of_level_3))
+            (x8, y8, fontsize6) = (150, 400, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage8 = myFont6.render(record, 0, green)
+
             screen.blit(fontImage6, (x6, y6))
+            screen.blit(fontImage7, (x7, y7))
+            screen.blit(fontImage8, (x8, y8))
 
         if box_used is True and time - info_time < 150 and info_time != 0:
 
@@ -3319,6 +3454,7 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     yellow_hero.health = 100
     yellow_hero.rect.x = 20
     yellow_hero.rect.y = 314
+    yellow_hero.score = 0
 
     lava_1.damage = 30
     lava_2.damage = 30
@@ -3415,6 +3551,11 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             yellow_hero.drop = 0
             crossing_lava = True
 
+            if yellow_hero.score - 2 > 0:
+                yellow_hero.score -= 2
+            else:
+                yellow_hero.score = 0
+
             if yellow_hero.health <= 0:
                 dead_player = True
         else:
@@ -3456,6 +3597,12 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
             yellow_hero.health -= 30
             f_damage_mobs = True
+
+            if yellow_hero.score - 3 > 0:
+                yellow_hero.score -= 3
+            else:
+                yellow_hero.score = 0
+
             if yellow_hero.health <= 0:
                 dead_player = True
 
@@ -3469,6 +3616,11 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
             else:
                 yellow_hero.rect.x -= fly.kickback
+
+            if yellow_hero.score - 5 > 0:
+                yellow_hero.score -= 5
+            else:
+                yellow_hero.score = 0
 
             yellow_hero.health -= fly.damage
 
@@ -3559,12 +3711,18 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                             if x == saw_1.rect.x and y == saw_1.rect.y:
                                 saw_death = time
                                 saw_1.health = 0
+                                if yellow_hero.score - 10 > 0:
+                                    yellow_hero.score -= 10
+                                else:
+                                    yellow_hero.score = 0
                             if x == fly.rect.x and y == fly.rect.y:
                                 fly_death = time
                                 fly.speed = 0
                                 fly.kickback = 0
                                 fly.damage = 0
                                 fly.health -= bomb.damage
+                                yellow_hero.count_money += 3
+                                yellow_hero.score += 3
 
                 if event.button == 1 and crossing is True:
                     if audio_On is True:
@@ -3656,7 +3814,22 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage6 = myFont6.render(inscription_wins, 0, green)
 
+            score = ("Your score: " + str(yellow_hero.score))
+            (x7, y7, fontsize6) = (150, 350, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage7 = myFont6.render(score, 0, green)
+
+            if yellow_hero.score > yellow_hero.records_of_level_4:
+                yellow_hero.records_of_level_4 = yellow_hero.score
+
+            record = ("Your record: " + str(yellow_hero.records_of_level_4))
+            (x8, y8, fontsize6) = (150, 400, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage8 = myFont6.render(record, 0, green)
+
             screen.blit(fontImage6, (x6, y6))
+            screen.blit(fontImage7, (x7, y7))
+            screen.blit(fontImage8, (x8, y8))
 
         if dead_player is True:
 
@@ -3765,6 +3938,7 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 door_mid_1.open = True
                 door_top_1.open = True
                 task_2 = True
+                yellow_hero.score += 5
 
         if task_2 is True and crossing_2 is True and inter_dialog is True:
             phraze_9 = ("This is end! Go to the new level")
@@ -3782,6 +3956,7 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             task_1 = True
             entities_level_4.add(sprung)
             sprung_in_game = True
+            yellow_hero.score += 5
 
         clock.tick(40)
 
@@ -3828,6 +4003,7 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     yellow_hero.health = 100
     yellow_hero.rect.x = 20
     yellow_hero.rect.y = 314
+    yellow_hero.score = 20
 
     yellow_boss.health = 300
     yellow_boss.rect.x = 600
@@ -3880,6 +4056,11 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             if audio_On is True:
                 hit_worm.play()
             yellow_hero.health -= yellow_boss.damage
+
+            if yellow_hero.score - 5 > 0:
+                yellow_hero.score -= 5
+            else:
+                yellow_hero.score = 0
 
             if yellow_boss.rect.x > yellow_hero.rect.x:
                 yellow_hero.rect.x -= yellow_boss.kickback
@@ -4028,7 +4209,22 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage6 = myFont6.render(inscription_wins, 0, green)
 
+            score = ("Your score: " + str(yellow_hero.score))
+            (x7, y7, fontsize6) = (150, 350, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage7 = myFont6.render(score, 0, green)
+
+            if yellow_hero.score > yellow_hero.records_of_level_5:
+                yellow_hero.records_of_level_5 = yellow_hero.score
+
+            record = ("Your record: " + str(yellow_hero.records_of_level_5))
+            (x8, y8, fontsize6) = (150, 400, 30)
+            myFont6 = pygame.font.SysFont("None", fontsize6)
+            fontImage8 = myFont6.render(record, 0, green)
+
             screen.blit(fontImage6, (x6, y6))
+            screen.blit(fontImage7, (x7, y7))
+            screen.blit(fontImage8, (x8, y8))
         if dead_player is True:
 
             dead_text = ("You were killed! Press left click")
@@ -4079,7 +4275,6 @@ def menu():
     level_5_load = False  # Уровень 5 не запущен
     menu_load = False  # Всплывающее меню
     fullScreen = False  # Полноэкранный режим
-    music_On = True  # Музыка включена
     shop_load = False  # Магазин не открыт
     settings = False  # Настройки не включены
     shop_character = False  # Покупка персонажей в магазине не выбрана
@@ -4088,6 +4283,7 @@ def menu():
     level_select = False  # Выбор уровня
     price_bomb = 5  # Цена за бомбу
     save = False  # Игрок не нажал кнопку сохранения
+    records = False  # Окно рекордов не открыто
 
     while lobby is True:
 
@@ -4447,6 +4643,7 @@ def menu():
                 if event.button == 1 and crossing_6 is True and menu_load is True:
                     if audio_On is True:
                         switch_1.play()
+                    records = True
 
                 if event.button == 1 and crossing_7 is True and menu_load is True:
                     if audio_On is True:
@@ -4557,6 +4754,31 @@ def menu():
                     f.write(yellow_hero.pink)
                     f.write(yellow_hero.blue)
                     f.write(yellow_hero.green)
+                    f.write("\n")
+                    if yellow_hero.records_of_level_1 < 10:
+                        f.write("0" + str(yellow_hero.records_of_level_1))
+                    else:
+                        f.write(str(yellow_hero.records_of_level_1))
+                    f.write("\n")
+                    if yellow_hero.records_of_level_2 < 10:
+                        f.write("0" + str(yellow_hero.records_of_level_2))
+                    else:
+                        f.write(str(yellow_hero.records_of_level_2))
+                    f.write("\n")
+                    if yellow_hero.records_of_level_3 < 10:
+                        f.write("0" + str(yellow_hero.records_of_level_3))
+                    else:
+                        f.write(str(yellow_hero.records_of_level_3))
+                    f.write("\n")
+                    if yellow_hero.records_of_level_4 < 10:
+                        f.write("0" + str(yellow_hero.records_of_level_4))
+                    else:
+                        f.write(str(yellow_hero.records_of_level_4))
+                    f.write("\n")
+                    if yellow_hero.records_of_level_5 < 10:
+                        f.write("0" + str(yellow_hero.records_of_level_5))
+                    else:
+                        f.write(str(yellow_hero.records_of_level_5))
                     f.close()
 
                 if event.button == 1 and level_select is True and crossing_20 is True:
@@ -4711,11 +4933,12 @@ def menu():
         clock.tick(40)
 
         screen.blit(background_color, (0, 0))
-        screen.blit(hudCoin_trans, (coin_x, coin_y))
-        if yellow_hero.count_money < 10:
-            screen.blit(fontImage, (x, y))
-        else:
-            screen.blit(fontImage, (x - 9, y))
+        if records is False:
+            screen.blit(hudCoin_trans, (coin_x, coin_y))
+            if yellow_hero.count_money < 10:
+                screen.blit(fontImage, (x, y))
+            else:
+                screen.blit(fontImage, (x - 9, y))
 
         if yellow_hero.yellow == "T":
             screen.blit(hudLevel, (level_x, level_y))
@@ -4728,8 +4951,9 @@ def menu():
         else:
             screen.blit(hudLevel_5, (level_x, level_y))
 
-        screen.blit(hudStar_trans, (600, -3))
-        screen.blit(fontImage9, (x4, y4))
+        if records is False:
+            screen.blit(hudStar_trans, (600, -3))
+            screen.blit(fontImage9, (x4, y4))
 
         if menu_load is False and level_select is False:
             screen.blit(button_menu, (start_x, start_y))
@@ -4855,6 +5079,47 @@ def menu():
             screen.blit(fontImage10, (x5, y5))
             if menu_load is False or shop_load is True or settings is True:
                 save = False
+
+        if records is True:
+
+            record = ("Personal records")
+            (x5, y5, fontsize) = (300, 50, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage11 = myFont.render(record, 0, green)
+
+            level_1 = ("Level 1: " + str(yellow_hero.records_of_level_1))
+            (x6, y6, fontsize) = (360, 130, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage12 = myFont.render(level_1, 0, red)
+
+            level_2 = ("Level 2: " + str(yellow_hero.records_of_level_2))
+            (x7, y7, fontsize) = (360, 180, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage13 = myFont.render(level_2, 0, red)
+
+            level_3 = ("Level 3: " + str(yellow_hero.records_of_level_3))
+            (x8, y8, fontsize) = (360, 230, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage14 = myFont.render(level_3, 0, red)
+
+            level_4 = ("Level 4: " + str(yellow_hero.records_of_level_4))
+            (x9, y9, fontsize) = (360, 280, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage15 = myFont.render(level_4, 0, red)
+
+            level_5 = ("Level 5: " + str(yellow_hero.records_of_level_5))
+            (x10, y10, fontsize) = (360, 330, 50)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage16 = myFont.render(level_5, 0, red)
+
+            screen.blit(fontImage11, (x5, y5))
+            screen.blit(fontImage12, (x6, y6))
+            screen.blit(fontImage13, (x7, y7))
+            screen.blit(fontImage14, (x8, y8))
+            screen.blit(fontImage15, (x9, y9))
+            screen.blit(fontImage16, (x10, y10))
+            if menu_load is False or shop_load is True or settings is True:
+                records = False
 
         if audio_On is True and music_On is True:
             main_music.play()
