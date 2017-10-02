@@ -1830,10 +1830,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= worm.kickback
                 yellow_hero.health -= worm.damage
 
-            if yellow_hero.score - 1 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if worm_death is False:
+                if yellow_hero.score - 1 > 0:
+                    yellow_hero.score -= 1
+                else:
+                    yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1854,10 +1855,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= worm_pink.kickback
                 yellow_hero.health -= worm_pink.damage
 
-            if yellow_hero.score - 1 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if worm_pink_death is False:
+                if yellow_hero.score - 1 > 0:
+                    yellow_hero.score -= 1
+                else:
+                    yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1878,10 +1880,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= mouse.kickback
                 yellow_hero.health -= mouse.damage
 
-            if yellow_hero.score - 1 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if mouse_death is False:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -1902,10 +1905,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.rect.x -= mouse_2.kickback
                 yellow_hero.health -= mouse_2.damage
 
-            if yellow_hero.score - 1 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if mouse_death_2 is False:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             if yellow_hero.health <= 0:
                 dead_player = True
@@ -2320,6 +2324,7 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
         entities_level_2.remove(bee)
 
     while level_2 is True:
+
 
         crossing = False  # Нет пересечения с кнопкой паузы
         box_crossing = False  # Персонаж не у ящика
@@ -2912,10 +2917,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_1.kickback
 
-            if yellow_hero.score - 2 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if fish_1_death == 0:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= fish_1.damage
 
@@ -2932,10 +2938,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_2.kickback
 
-            if yellow_hero.score - 2 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if fish_2_death == 0:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= fish_2.damage
 
@@ -2952,10 +2959,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_3.kickback
 
-            if yellow_hero.score - 2 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if fish_3_death == 0:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= fish_3.damage
 
@@ -2972,10 +2980,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fish_4.kickback
 
-            if yellow_hero.score - 2 > 0:
-                yellow_hero.score -= 2
-            else:
-                yellow_hero.score = 0
+            if fish_4_death == 0:
+                if yellow_hero.score - 2 > 0:
+                    yellow_hero.score -= 2
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= fish_4.damage
 
@@ -2992,10 +3001,11 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= green_fish_1.kickback
 
-            if yellow_hero.score - 3 > 0:
-                yellow_hero.score -= 3
-            else:
-                yellow_hero.score = 0
+            if green_fish_1_death == 0:
+                if yellow_hero.score - 3 > 0:
+                    yellow_hero.score -= 3
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= green_fish_1.damage
 
@@ -3374,7 +3384,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 yellow_hero.records_of_level_3 = yellow_hero.score
 
             record = ("Your record: " + str(yellow_hero.records_of_level_3))
-            (x8, y8, fontsize6) = (150, 400, 30)
+            (x8, y8, fontsize6) = (350, 350, 30)
             myFont6 = pygame.font.SysFont("None", fontsize6)
             fontImage8 = myFont6.render(record, 0, green)
 
@@ -3617,10 +3627,11 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             else:
                 yellow_hero.rect.x -= fly.kickback
 
-            if yellow_hero.score - 5 > 0:
-                yellow_hero.score -= 5
-            else:
-                yellow_hero.score = 0
+            if fly_death == 0:
+                if yellow_hero.score - 5 > 0:
+                    yellow_hero.score -= 5
+                else:
+                    yellow_hero.score = 0
 
             yellow_hero.health -= fly.damage
 
@@ -4911,7 +4922,7 @@ def menu():
                             locked_click.play()
 
                 if event.button == 1 and shop_load is True and crossing_27 is True:
-                    if yellow_hero.star >= 3 and yellow_hero.count_money >= 40:
+                    if yellow_hero.star >= 3:
                         yellow_hero.green = "T"
                         yellow_hero.beige = "F"
                         yellow_hero.yellow = "F"
