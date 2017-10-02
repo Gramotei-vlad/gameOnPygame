@@ -43,3 +43,7 @@ The game is done on 100 %. (26.06.2017)
 
 Added system of personal records.
 Fixed bugs. (01.10.2017)
+
+-----
+
+Fixed bugs associated with bad work system of scoring. (02.10.2017)
