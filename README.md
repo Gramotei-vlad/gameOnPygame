@@ -10,7 +10,7 @@ In game playing music : Dom Smart - Adventure.
 If somebody can compile on Python with help cx-Freeze, do it!
 
 <img src="screenshots/screenshot1.png"/>
-![alt text](screenshots/screenshot2.png)
+![screenshot](screenshots/screenshot2.png)
 ![alt text](screenshots/screenshot3.png)
 ![alt text](screenshots/screenshot4.png)
 
