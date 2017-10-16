@@ -9,6 +9,8 @@ In game playing music : Dom Smart - Adventure.
 
 If somebody can compile on Python with help cx-Freeze, do it!
 
+The game has a multiplayer mode.
+
 ![alt text](Screenshots/Screenshot1.png)
 ![alt text](Screenshots/Screenshot2.png)
 ![alt text](Screenshots/Screenshot3.png)
