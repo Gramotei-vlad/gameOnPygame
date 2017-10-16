@@ -3,6 +3,7 @@ from pygame.locals import *
 import pyganim
 import pyglet
 import sys
+import socket
 
 pygame.init()
 # Создание окна игры
@@ -10,6 +11,8 @@ window_width = 896
 window_height = 640
 flags = 0  # Оконный или полноэкранный режим
 music_On = True  # Музыка включена
+server_not_work = False  # Сервер не работает
+time_of_turn_off = 0  # Время отключения от сервера
 screen = pygame.display.set_mode((window_width, window_height), flags, 32)
 
 
@@ -36,6 +39,7 @@ background_color_2 = pygame.image.load("blue_desert.png").convert_alpha()
 background_color_3 = pygame.image.load("colored_desert.png").convert_alpha()
 background_color_4 = pygame.image.load("colored_shroom.png").convert_alpha()
 button_menu = pygame.image.load("buttonStart.png").convert_alpha()
+button_menu_not_active = pygame.image.load("buttonStart (2).png").convert_alpha()
 button_select = pygame.image.load("buttonSelect.png").convert_alpha()
 hudCoin = pygame.image.load("hudCoin.png").convert_alpha()
 hudHealth = pygame.image.load("hudHeart_full.png").convert_alpha()
@@ -82,6 +86,7 @@ hudSave_2 = pygame.image.load("save (2).png").convert_alpha()
 hudStar = pygame.image.load("star.png").convert_alpha()
 hudYellowKeyEmpty = pygame.image.load("hudKey_yellow_empty.png").convert_alpha()
 hudYellowKey = pygame.image.load("hudKey_yellow.png").convert_alpha()
+hudMultiplayers = pygame.image.load("massiveMultiplayer.png").convert_alpha()
 
 # Изменяем размеры
 hudCoin_trans = pygame.transform.scale(hudCoin, (70, 70))
@@ -181,17 +186,20 @@ menu_y = 20
 window_x = 780
 window_y = 570
 
+myltiplayer_x = 830
+myltiplayer_y = 60
+
 trophy_x = 830
-trophy_y = 60
+trophy_y = 100
 
 quit_x = 830
-quit_y = 100
+quit_y = 140
 
 music_x = 730
 music_y = 570
 
 return_x = 830
-return_y = 180
+return_y = 220
 
 return_x_2 = 685
 return_y_2 = 570
@@ -278,7 +286,7 @@ save_x = 400
 save_y = 250
 
 save_2_x = 830
-save_2_y = 143
+save_2_y = 183
 
 clock = pygame.time.Clock()
 pygame.time.delay(3000)
@@ -393,7 +401,7 @@ class Hero(pygame.sprite.Sprite):
         # Характеристики персонажа
         self.speed = 10
         self.jump = 250
-        self.drop = 50
+        self.drop = 0
         self.score = 0
 
         # Инвентарь
@@ -429,8 +437,8 @@ class Hero(pygame.sprite.Sprite):
 
     def update(self, left_move, right_move, up_move, damage_mobs):
 
-        if self.rect.x == 0:
-            left_move = False
+        """if self.rect.x == 0:
+            left_move = False"""
 
         if self.rect.x == 3880 and level_1_load is True:
             right_move = False
@@ -1581,12 +1589,16 @@ total_level_4_height = 1000
 total_level_5_width = 2000
 total_level_5_height = 1000
 
+total_online_level_width = 1500
+total_online_level_height = 1000
+
 # Экземпляр динамической камеры
 camera = Camera(camera_configure, total_level_1_width, total_level_1_height)
 camera_2 = Camera(camera_configure, total_level_2_width, total_level_2_height)
 camera_3 = Camera(camera_configure, total_level_3_width, total_level_3_height)
 camera_4 = Camera(camera_configure, total_level_4_width, total_level_4_height)
 camera_5 = Camera(camera_configure, total_level_5_width, total_level_5_height)
+camera_6 = Camera(camera_configure, total_online_level_width, total_online_level_height)
 
 # Совокупность экземпляров спрайтов
 entities = pygame.sprite.Group()
@@ -1594,6 +1606,7 @@ entities_level_2 = pygame.sprite.Group()
 entities_level_3 = pygame.sprite.Group()
 entities_level_4 = pygame.sprite.Group()
 entities_level_5 = pygame.sprite.Group()
+entities_online_level = pygame.sprite.Group()
 
 
 # Загрузка сохранений
@@ -1658,6 +1671,7 @@ def load():
     yellow_hero.records_of_level_5 = int(f.read(3))
     f.close()
 
+
 load()
 
 
@@ -1695,7 +1709,7 @@ def pause():
                 if event.button == 1 and crossing is True and level_2_load is True:
                     rungame_level_2(left_move, right_move, up_move, damage_mobs, collide_ground, go_attack, return_in_usual)
                 if event.button == 1 and crossing_2 is True:
-                    menu()
+                    menu(server_not_work)
 
         screen.blit(hudDoor, (door_x, door_y))
         screen.blit(hudSave, (save_x, save_y))
@@ -2136,12 +2150,12 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     yellow_hero.count_money += 10
                     yellow_hero.level_1_completed = "T"
                     launch_of_game = False
-                    menu()
+                    menu(server_not_work)
 
                 # Если игрок умер и нажата кнопка, то выходим в меню
                 if event.button == 1 and dead_player is True:
                     launch_of_game = False
-                    menu()
+                    menu(server_not_work)
 
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
@@ -2518,10 +2532,10 @@ def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_at
                 if event.button == 1 and game_completed is True:
                     yellow_hero.count_money += 10
                     yellow_hero.level_2_completed = "T"
-                    menu()
+                    menu(server_not_work)
 
                 if event.button == 1 and dead_player is True:
-                    menu()
+                    menu(server_not_work)
 
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
@@ -3270,7 +3284,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                         fon_music.pause()
                         fon_music_2.pause()
                         sound_jump.pause()
-                    menu()
+                    menu(server_not_work)
 
                 if event.button == 1 and game_completed is True:
                     yellow_hero.count_money += 15
@@ -3279,7 +3293,7 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                         fon_music.pause()
                         fon_music_2.pause()
                         sound_jump.pause()
-                    menu()
+                    menu(server_not_work)
 
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT and yellow_hero.rect.x < 2800:
@@ -3745,12 +3759,12 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                     yellow_hero.count_money += 20
                     yellow_hero.level_4_completed = "T"
                     level_4 = False
-                    menu()
+                    menu(server_not_work)
 
                 # Если игрок умер и нажата кнопка, то выходим в меню
                 if event.button == 1 and dead_player is True:
                     level_4 = False
-                    menu()
+                    menu(server_not_work)
 
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
@@ -4148,11 +4162,11 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
                 if event.button == 1 and game_completed is True:
                     horror_music.pause()
                     yellow_hero.count_money += 25
-                    menu()
+                    menu(server_not_work)
 
                 if event.button == 1 and dead_player is True:
                     horror_music.pause()
-                    menu()
+                    menu(server_not_work)
 
             if event.type == KEYDOWN:
                 if event.key == K_RIGHT:
@@ -4269,9 +4283,220 @@ def rungame_level_5(f_left_move, f_right_move, f_up_move, f_damage_mobs):
             pause()
 
 
-def menu():
+def online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, sock):
+    level_6 = True  # Шестой уровень запущен
+    confirmation = False  # Бомба не установлена!
+    download_bomb = 0  # Количество установленных бомб!
+    time = 0
+
+    yellow_hero.health = 100
+    yellow_hero.rect.x = 20
+    yellow_hero.rect.y = 314
+    # yellow_hero.score = 20
+
+    no_name = bytes('b', 'utf-8')
+    ques_sign = bytes('?', 'utf-8')
+    excl_sign = bytes('!', 'utf-8')
+    star_sign = bytes('*', 'utf-8')
+    percentage_sign = bytes('%', 'utf-8')
+    plus_sign = bytes('+', 'utf-8')
+    minus_sign = bytes('-', 'utf-8')
+    dog_sign = bytes('@', 'utf-8')
+
+    sock.send(bytes(yellow_hero.health))
+    sock.send(bytes(yellow_hero.rect.x))
+    sock.send(bytes(yellow_hero.rect.y))
+
+    if not entities_online_level.has(yellow_hero):
+        player.add(yellow_hero)
+        entities_online_level.add(player)
+
+    while True:
+
+        sock.send(no_name + bytes('', 'utf-8') + no_name)
+        try:
+            data = sock.recv(1024)
+        except ConnectionResetError:
+            server_not_work = True
+            menu(server_not_work)
+        crossing = False  # Нет пересечения с изображением
+
+        text_money = (str(yellow_hero.count_money))
+        (x3, y3, fontsize) = (780, 35, 45)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage = myFont.render(text_money, 0, green)
+
+        health = (str(yellow_hero.health))
+        (x2, y2, fontsize) = (745, 98, 45)
+        myFont = pygame.font.SysFont("None", fontsize)
+        fontImage2 = myFont.render(health, 0, green)
+
+        no_bomb = (str(yellow_hero.amount_bomb))
+        (x5, y5, fontsize) = (770, 170, 45)
+        myFont5 = pygame.font.SysFont("None", fontsize)
+        fontImage5 = myFont5.render(no_bomb, 0, green)
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+            # Клавиши нажаты!
+            if event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    level_6 = False
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 3 and download_bomb == 0:
+                    sock.send(plus_sign + bytes(str(yellow_hero.amount_bomb), 'utf-8') + plus_sign)
+                    data = sock.recv(1024)
+                    if str(data).find('+') != -1:
+                        x = data.decode('utf-8').find('+') + 1
+                        y = data.decode('utf-8').rfind('+')
+                        if int(data[x:y]) == 0:
+                            print('Бомб нет')
+                        else:
+                            sock.send(minus_sign + bytes('1', 'utf-8') + minus_sign)
+                            entities_online_level.add(inventory)
+                            bomb.rect.x = yellow_hero.rect.x
+                            bomb.rect.y = yellow_hero.rect.y + 156
+                            yellow_hero.amount_bomb -= 1
+                            download_bomb += 1
+
+                            if audio_On is True:
+                                sound_click.play()
+
+                            confirmation = True
+                if event.button == 1 and confirmation is True:
+                    sock.send(dog_sign + bytes('1', 'utf-8') + dog_sign)
+                    download_bomb -= 1
+                    entities_online_level.remove(bomb)
+
+                    if audio_On is True:
+                        explosion.play()
+                    confirmation = False
+
+                    for x in range(bomb.rect.x - 230, bomb.rect.x + 230):
+                        pass
+
+            if event.type == KEYDOWN:
+                if event.key == K_RIGHT:
+                    sock.send(excl_sign + bytes(str(yellow_hero.rect.x), 'utf-8') + excl_sign)
+                    data = sock.recv(1024)
+                    data.decode('utf-8')
+                    if str(data).find('!') != -1:
+                        x = data.decode('utf-8').find('!') + 1
+                        y = data.decode('utf-8').rfind('!')
+                        if int(data[x:y]) == 1:
+                            if audio_On is True and yellow_hero.onGround is True:
+                                sound_step.play()
+                            f_right_move = True
+                            print("Двигаюсь вправо")
+                        else:
+                            f_right_move = False
+                            print("Не двигаюсь вправо")
+
+                if event.key == K_LEFT:
+                    sock.send(ques_sign + bytes(str(yellow_hero.rect.x), 'utf-8') + ques_sign)
+                    data = sock.recv(1024)
+                    data.decode('utf-8')
+                    if str(data).find('?') != -1:
+                        x = data.decode('utf-8').find('?') + 1
+                        y = data.decode('utf-8').rfind('?')
+                        if int(data[x:y]) == 1:
+                            if audio_On is True and yellow_hero.onGround is True:
+                                sound_step.play()
+                            f_left_move = True
+                        else:
+                            f_left_move = False
+
+                if event.key == K_UP and yellow_hero.onGround is True:
+                    yellow_hero.onGround = False
+                    f_up_move = True
+                    yellow_hero.rect.y -= yellow_hero.jump
+
+                    # Клавиши отпущены
+            if event.type == KEYUP:
+                if event.key == K_RIGHT:
+                    f_right_move = False
+                    sock.send(percentage_sign + bytes(str(f_right_move), 'utf-8') + percentage_sign)
+                if event.key == K_LEFT:
+                    f_left_move = False
+                    sock.send(percentage_sign + bytes(str(f_left_move), 'utf-8') + percentage_sign)
+                if event.key == K_UP:
+                    f_up_move = False
+                    sock.send(percentage_sign + bytes(str(f_up_move), 'utf-8') + percentage_sign)
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, blocks, False)
+        if len(collisions) > 0:
+            yellow_hero.onGround = True
+            sock.send(star_sign + bytes('1', 'utf-8') + star_sign)
+            data = sock.recv(1024)
+            if str(data).find('*') != -1:
+                x = data.decode('utf-8').find('*') + 1
+                y = data.decode('utf-8').rfind('*')
+                yellow_hero.drop = int(data[x:y])
+            yellow_hero.rect.y += yellow_hero.drop
+        else:
+            yellow_hero.onGround = False
+            sock.send(star_sign + bytes('0', 'utf-8') + star_sign)
+            data = sock.recv(1024)
+            if str(data).find('*') != -1:
+                x = data.decode('utf-8').find('*') + 1
+                y = data.decode('utf-8').rfind('*')
+                yellow_hero.drop = int(data[x:y])
+            yellow_hero.rect.y += yellow_hero.drop
+
+        collisions = pygame.sprite.spritecollide(yellow_hero, inventory, False)
+        if len(collisions) > 0 and bomb.rect.x > yellow_hero.rect.x:
+            bomb.rect.x += 10
+        if len(collisions) > 0 and bomb.rect.x < yellow_hero.rect.x and bomb.rect.x != 0:
+            bomb.rect.x -= 10
+        if len(collisions) > 0 and bomb.rect.x == 0 and download_bomb is True:
+            yellow_hero.rect.x += 10
+            f_left_move = False
+
+        screen.blit(background_color, (0, 0))
+        screen.blit(hudCoin_trans, (800, 10))
+
+        clock.tick(40)
+
+        if yellow_hero.amount_bomb > 0:
+            screen.blit(hudBomb_trans, (800, 140))
+        else:
+            screen.blit(hudBombNo_trans, (800, 140))
+
+        if yellow_hero.health <= 50 and yellow_hero.health > 0:
+            screen.blit(hudHealthHalf_trans, (800, 70))
+        elif yellow_hero.health <= 0:
+            screen.blit(hudHealthEmpty_trans, (800, 70))
+        else:
+            screen.blit(hudHealth_trans, (800, 70))
+
+        if yellow_hero.count_money < 10:
+            screen.blit(fontImage, (x3, y3))
+        else:
+            screen.blit(fontImage, (x3 - 10, y3))
+        if yellow_hero.health >= 100:
+            screen.blit(fontImage2, (x2, y2))
+        else:
+            screen.blit(fontImage2, (x2 + 20, y2))
+        if yellow_hero.amount_bomb < 10:
+            screen.blit(fontImage5, (x5, y5))
+        else:
+            screen.blit(fontImage5, (x5 - 10, y5))
+
+        for event in entities_online_level:
+            screen.blit(event.image, camera_6.apply(event))
+            camera_6.update(yellow_hero)
+
+        player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
+        pygame.display.update()
+        time += 1
+
+
+def menu(server_not_work):
     lobby = True  # Игрок в меню
-    global audio_On
+    global audio_On, sock
     global level_1_load
     global level_2_load
     global level_3_load
@@ -4295,6 +4520,13 @@ def menu():
     price_bomb = 5  # Цена за бомбу
     save = False  # Игрок не нажал кнопку сохранения
     records = False  # Окно рекордов не открыто
+    multiplayer = False  # Онлайн режим не запущен
+    time = 0  # Время
+    server = ''  # Строка, говорящая о состоянии сервера
+    work_server = True  # Сервер работает
+    time_unput = 0  # Время входа в мультиплеер
+    confiramtion = False  # Не отослали подтверждение
+    no_name = bytes('b', 'utf-8')
 
     while lobby is True:
 
@@ -4325,6 +4557,7 @@ def menu():
         crossing_25 = False  # Нет пересечения с кнопкой выбора розового персонажа
         crossing_26 = False  # Нет пересечения с кнопкой выбора синего персонажа
         crossing_27 = False  # Нет пересечения с кнопкой выбора зеленого персонажа
+        crossing_28 = False  # Нет пересечения с кнопкой мультиплеера
 
         no_bomb = (str(yellow_hero.amount_bomb))
         (x6, y6, fontsize) = (540, 310, 45)
@@ -4562,12 +4795,20 @@ def menu():
                 if pos_x == x_3 and pos_y == y_3:
                     crossing_27 = True
 
+        for x_3 in range(myltiplayer_x, myltiplayer_x + 35):
+            for y_3 in range(myltiplayer_y, myltiplayer_y + 40):
+                pos = pygame.mouse.get_pos()
+                pos_x = pos[0]
+                pos_y = pos[1]
+                if pos_x == x_3 and pos_y == y_3:
+                    crossing_28 = True
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == MOUSEBUTTONDOWN:
-                if event.button == 1 and crossing is True and shop_load is False and level_select is False:
+                if event.button == 1 and crossing is True and shop_load is False and level_select is False and multiplayer is False:
                     if audio_On is True:
                         switch_button.play()
                     if yellow_hero.level_2_completed == "F":
@@ -4941,6 +5182,19 @@ def menu():
                         if audio_On is True:
                             locked_click.play()
 
+                if event.button == 1 and crossing_28 is True and menu_load is True:
+                    if audio_On is True:
+                        switch_1.play()
+                    multiplayer = True
+
+                if event.button == 1 and multiplayer is True and crossing is True:
+                    if server != 'Server doesnt work!':
+                        if audio_On is True:
+                            switch_button.play()
+                        entities_online_level.add(player)
+                        entities_online_level.add(blocks)
+                        online_level(left_move, right_move, up_move, damage_mobs, sock)
+
         clock.tick(40)
 
         screen.blit(background_color, (0, 0))
@@ -4950,6 +5204,17 @@ def menu():
                 screen.blit(fontImage, (x, y))
             else:
                 screen.blit(fontImage, (x - 9, y))
+
+        if server_not_work is True:
+            turn_off = "You passed out!"
+            (x11, y11, fontsize11) = (330, 440, 30)
+            myFont11 = pygame.font.SysFont("None", fontsize11)
+            fontImage11 = myFont11.render(turn_off, 0, green)
+
+            if time >= 30:
+                server_not_work = False
+            else:
+                screen.blit(fontImage11, (x11, y11))
 
         if yellow_hero.yellow == "T":
             screen.blit(hudLevel, (level_x, level_y))
@@ -5026,6 +5291,7 @@ def menu():
             screen.blit(hudMenu, (menu_x, menu_y))
         else:
             screen.blit(hudShop, (shop_x, shop_y))
+            screen.blit(hudMultiplayers, (myltiplayer_x, myltiplayer_y))
             screen.blit(hudTrophy, (trophy_x, trophy_y))
             screen.blit(hudQuit, (quit_x, quit_y))
             screen.blit(hudSave_2, (save_2_x, save_2_y))
@@ -5132,12 +5398,49 @@ def menu():
             if menu_load is False or shop_load is True or settings is True:
                 records = False
 
+        if multiplayer is True:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                sock.connect(('127.0.0.1', 8080))
+            except ConnectionRefusedError:
+                work_server = False
+                time_unput = time
+                multiplayer = False
+            else:
+                if confiramtion is False:
+                    sock.send(b"Yes")
+                    confiramtion = True
+                else:
+                    sock.send(no_name + bytes('', 'utf-8') + no_name)
+                data = sock.recv(1024)
+                print(data.decode('utf-8'))
+                if str(data.decode('utf-8')) == 'Go':
+                    entities_online_level.add(player)
+                    entities_online_level.add(blocks)
+                    online_level(left_move, right_move, up_move, damage_mobs, sock)
+
+                screen.blit(button_menu, (start_x, start_y))
+
+            if menu_load is False or shop_load is True or settings is True:
+                multiplayer = False
+
+        if work_server is False:
+            server = 'Server doesnt work!'
+            (x, y, fontsize) = (300, 250, 45)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage = myFont.render(server, 0, green)
+
+            screen.blit(fontImage, (x, y))
+            if time - time_unput > 30:
+                work_server = True
+
         if audio_On is True and music_On is True:
             main_music.play()
         else:
             main_music.pause()
 
+        time += 1
         pygame.display.update()
 
 
-menu()
+menu(server_not_work)
