@@ -1,0 +1,427 @@
+import pygame
+import pyganim
+import socket
+import sys
+from pygame.locals import *
+
+pygame.init()
+# Создание окна игры
+window_width = 896
+window_height = 640
+flags = 0  # Оконный или полноэкранный режим
+screen = pygame.display.set_mode((window_width, window_height), flags, 32)
+pygame.display.set_caption("Server")
+background_color = pygame.image.load("fon1.png").convert_alpha()
+white = (255, 255, 255)
+green = (0, 255, 0)
+
+# Сетевая часть
+sock = socket.socket()
+sock.bind(('', 8080))
+sock.listen(3)
+
+image_hero_1 = pygame.image.load("Player.png").convert_alpha()
+f_left_move = f_right_move = f_up_move = False  # Кнопки не нажаты
+f_damage_mobs = False  # Нет урона от моба
+onGround = True  # Мы на земле
+
+hudCoin = pygame.image.load("hudCoin.png").convert_alpha()
+hudHealth = pygame.image.load("hudHeart_full.png").convert_alpha()
+hudHealthHalf = pygame.image.load("hudHeart_half.png").convert_alpha()
+hudHealthEmpty = pygame.image.load("hudHeart_empty.png").convert_alpha()
+# hudPause = pygame.image.load("pause.png").convert_alpha()
+hudBomb = pygame.image.load("bomb.png").convert_alpha()
+hudBombNo = pygame.image.load("bombWhite.png").convert_alpha()
+
+hudCoin_trans = pygame.transform.scale(hudCoin, (70, 70))
+hudHealth_trans = pygame.transform.scale(hudHealth, (70, 70))
+hudHealthHalf_trans = pygame.transform.scale(hudHealthHalf, (70, 70))
+hudHealthEmpty_trans = pygame.transform.scale(hudHealthEmpty, (70, 70))
+hudBomb_trans = pygame.transform.scale(hudBomb, (70, 70))
+hudBombNo_trans = pygame.transform.scale(hudBombNo, (70, 70))
+
+# Анимации на сервере
+Anim_right = [("alienYellow_walk1.png", 0.1)]
+Anim_stay = [("Player.png", 0.1)]
+Anim_jump = [("alienYellow_jump.png", 0.1)]
+Anim_hit = [("AlienYellow_hit.png", 1.0)]
+yellow_anim_right = pyganim.PygAnimation(Anim_right)
+yellow_anim_stay = pyganim.PygAnimation(Anim_stay)
+yellow_anim_hit = pyganim.PygAnimation(Anim_hit)
+yellow_anim_jump = pyganim.PygAnimation(Anim_jump)
+
+# Определяющие знаки
+no_name = bytes('b', 'utf-8')
+ques_sign = bytes('?', 'utf-8')
+excl_sign = bytes('!', 'utf-8')
+star_sign = bytes('*', 'utf-8')
+
+
+class Hero(pygame.sprite.Sprite):
+    def __init__(self):
+
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = image_hero_1
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        # Здоровье
+        self.health = 100
+
+        # Скины персонажа
+        # self.yellow = "T"  # На данный момент надет (T == True)
+        # self.beige = "F"
+        # self.pink = "F"
+        # self.blue = "F"
+        # self.green = "F"
+
+        # Характеристики персонажа
+        self.speed = 4
+        self.jump = 15
+        self.drop = 5
+        self.score = 0
+
+        # Инвентарь
+        self.count_money = 0
+        self.amount_bomb = 1
+        self.star = 0
+
+        # Расположение
+        self.rect.x = 20
+        self.rect.y = 314
+        self.onGround = True  # Находимся на земле.
+
+        # Рекорды
+        self.records_of_level_1 = 0
+        self.records_of_level_2 = 0
+        self.records_of_level_3 = 0
+        self.records_of_level_4 = 0
+        self.records_of_level_5 = 0
+
+        # Загрузка анимации
+        self.AnimationRight = yellow_anim_right
+        self.AnimationStay = yellow_anim_stay
+        self.AnimationHit = yellow_anim_hit
+        self.AnimationJump = yellow_anim_jump
+        # self.AnimationClimb = yellow_anim_climb
+        # self.AnimationSwim = yellow_anim_swim
+
+        # Личные данные
+        """self.level_1_completed = "F"
+        self.level_2_completed = "F"
+        self.level_3_completed = "F"
+        self.level_4_completed = "F"""""
+
+    def update(self, f_left_move, f_right_move, f_up_move, f_damage_mobs):
+
+        """if self.rect.x == 0:
+            left_move = False"""
+
+        if f_left_move is True:
+            """if audio_On is True and self.onGround is True:
+                sound_step.play()"""
+
+            self.rect.x -= self.speed
+        if f_right_move is True:
+            self.rect.x += self.speed
+            # Проигрывание и зарисовка анимации
+            self.AnimationRight.play()
+            self.AnimationRight.blit(self.image, (0, 0))
+
+        if self.onGround is False:
+            self.AnimationJump.play()
+            self.AnimationJump.blit(self.image, (0, 0))
+
+        if not (f_right_move or f_left_move) is True and f_up_move is False:
+            self.AnimationStay.play()
+            self.AnimationStay.blit(self.image, (0, 0))
+
+
+class Ground(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("grass.png").convert_alpha()
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        # Расположение
+        self.rect.x = 0
+        self.rect.y = 570
+
+
+class Bomb(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = pygame.image.load("bomb.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.image.set_colorkey(white)
+
+        self.rect = self.image.get_rect()
+
+        self.drop = 10  # Скорость падения
+        self.damage = 100 # Урон бомбы
+        self.kickback = 30 # Отталкивание от взрыва
+
+
+inventory = pygame.sprite.Group()
+bomb = Bomb()
+inventory.add(bomb)
+
+change_x = 0
+blocks = pygame.sprite.Group()
+while change_x < 2000:
+    block_ground = Ground()
+    block_ground.rect.x = change_x
+    change_x += 127
+    blocks.add(block_ground)
+
+player = pygame.sprite.Group()
+yellow_hero = Hero()
+player.add(yellow_hero)
+
+
+class Camera(object):
+    def __init__(self, camera_func, width_cam, height_cam):
+        self.camera_func = camera_func
+        self.state = Rect(0, 0, width_cam, height_cam)
+
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
+
+    def update(self, target):
+        self.state = self.camera_func(self.state, target.rect)
+
+
+def camera_configure(camera, target_rect):
+    l, t, _, _ = target_rect
+    _, _, w, h = camera
+    l = -l + window_width / 2
+    t = -t + window_height / 2
+
+    l = min(0, l)
+    l = max(-(camera.width - window_width), l)
+    t = max(-(camera.height - window_height), t)
+    t = min(0, t)
+    return Rect(l, t, w, h)
+
+
+total_online_level_width = 1500
+total_online_level_height = 1000
+
+entities_online_level = pygame.sprite.Group()
+entities_online_level.add(player)
+entities_online_level.add(blocks)
+
+camera_6 = Camera(camera_configure, total_online_level_width, total_online_level_height)
+
+
+def online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, conn):
+    level_6 = True  # Шестой уровень не запущен
+    download_bomb = 0  # Количество установленных бомб!
+    important = False  # Отослали какие-то важные данные
+    amount = 0
+    time = 0
+
+    yellow_hero.health = 100
+    yellow_hero.rect.x = 20
+    yellow_hero.rect.y = 314
+    # yellow_hero.score = 20
+
+    no_name = bytes('b', 'utf-8')
+    ques_sign = bytes('?', 'utf-8')
+    excl_sign = bytes('!', 'utf-8')
+    star_sign = bytes('*', 'utf-8')
+    plus_sign = bytes('+', 'utf-8')
+    while level_6:
+
+            important = False  # Отослали какие-то важные данные
+            data = conn.recv(1024)
+            data.decode('utf-8')
+
+            if not data:
+                break
+            crossing = False  # Нет пересечения с изображением
+
+            text_money = (str(yellow_hero.count_money))
+            (x3, y3, fontsize) = (780, 35, 45)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage = myFont.render(text_money, 0, green)
+
+            health = (str(yellow_hero.health))
+            (x2, y2, fontsize) = (745, 98, 45)
+            myFont = pygame.font.SysFont("None", fontsize)
+            fontImage2 = myFont.render(health, 0, green)
+
+            no_bomb = (str(yellow_hero.amount_bomb))
+            (x5, y5, fontsize) = (770, 170, 45)
+            myFont5 = pygame.font.SysFont("None", fontsize)
+            fontImage5 = myFont5.render(no_bomb, 0, green)
+
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+
+            if str(data).find('!') != -1:
+                x = data.decode('utf-8').find('!') + 1
+                y = data.decode('utf-8').rfind('!')
+                if int(data[x:y]) >= 1300:
+                    f_right_move = False
+                    conn.send(excl_sign + bytes('0', 'utf-8') + excl_sign)
+                    important = True
+                else:
+                    f_right_move = True
+                    conn.send(excl_sign + bytes('1', 'utf-8') + excl_sign)
+                    important = True
+
+            if str(data).find('?') != -1:
+                x = data.decode('utf-8').find('?') + 1
+                y = data.decode('utf-8').rfind('?')
+                if int(data[x:y]) <= 15:
+                    f_left_move = False
+                    conn.send(ques_sign + bytes('0', 'utf-8') + ques_sign)
+                    important = True
+                else:
+                    f_left_move = True
+                    conn.send(ques_sign + bytes('1', 'utf-8') + ques_sign)
+                    important = True
+
+            if str(data).find('*') != -1:
+                x = data.decode('utf-8').find('*') + 1
+                y = data.decode('utf-8').rfind('*')
+                if int(data[x:y]) == 0:
+                    f_up_move = True
+                    yellow_hero.onGround = False
+                    yellow_hero.rect.y = 69  # Пришлось задать вручную, иначе не правильно робит прыжок
+                    conn.send(star_sign + bytes('5', 'utf-8') + star_sign)
+                    important = True
+                else:
+                    f_up_move = False
+                    yellow_hero.onGround = True
+                    conn.send(star_sign + bytes('0', 'utf-8') + star_sign)
+                    important = True
+
+            if str(data).find('%') != -1:
+                f_right_move = False
+                f_left_move = False
+                f_up_move = False
+                important = True
+
+            if str(data).find('+') != -1:
+                x = data.decode('utf-8').find('+') + 1
+                y = data.decode('utf-8').rfind('+')
+                if int(data[x:y]) == 0:
+                    yellow_hero.amount_bomb = int(data[x:y])
+                    conn.send(plus_sign + bytes('0', 'utf-8') + plus_sign)
+                else:
+                    yellow_hero.amount_bomb = int(data[x:y])
+                    conn.send(plus_sign + bytes('1', 'utf-8') + plus_sign)
+                important = True
+
+            if str(data).find('-') != -1:
+                x = data.decode('utf-8').find('-') + 1
+                y = data.decode('utf-8').rfind('-')
+                if int(data[x:y]) != -1:
+                    entities_online_level.add(inventory)
+                    bomb.rect.x = yellow_hero.rect.x
+                    bomb.rect.y = yellow_hero.rect.y + 156
+                    yellow_hero.amount_bomb -= 1
+                    download_bomb += 1
+
+            if str(data).find('@') != -1:
+                x = data.decode('utf-8').find('@') + 1
+                y = data.decode('utf-8').rfind('@')
+                if int(data[x:y]) != -1:
+                    download_bomb -= 1
+                    entities_online_level.remove(bomb)
+
+            if important is False:
+                if str(data).find('b') != - 1:
+                    print(data.decode('utf-8'))
+                    conn.send(no_name + bytes('', 'utf_8') + no_name)
+
+            collisions = pygame.sprite.spritecollide(yellow_hero, blocks, False)
+            if len(collisions) > 0:
+                yellow_hero.onGround = True
+                yellow_hero.drop = 0
+                yellow_hero.rect.y += yellow_hero.drop
+            else:
+                yellow_hero.onGround = False
+                yellow_hero.drop = 5
+                yellow_hero.rect.y += yellow_hero.drop
+
+            collisions = pygame.sprite.spritecollide(yellow_hero, inventory, False)
+            if len(collisions) > 0 and bomb.rect.x > yellow_hero.rect.x:
+                bomb.rect.x += 10
+            if len(collisions) > 0 and bomb.rect.x < yellow_hero.rect.x and bomb.rect.x != 0:
+                bomb.rect.x -= 10
+            if len(collisions) > 0 and bomb.rect.x == 0 and download_bomb is True:
+                yellow_hero.rect.x += 10
+                f_left_move = False
+
+            screen.blit(background_color, (0, 0))
+            # screen.blit(hudCoin_trans, (800, 10))
+
+            """if yellow_hero.amount_bomb > 0:
+                screen.blit(hudBomb_trans, (800, 140))
+            else:
+                screen.blit(hudBombNo_trans, (800, 140))
+
+            if yellow_hero.health <= 50 and yellow_hero.health > 0:
+                screen.blit(hudHealthHalf_trans, (800, 70))
+            elif yellow_hero.health <= 0:
+                screen.blit(hudHealthEmpty_trans, (800, 70))
+            else:
+                screen.blit(hudHealth_trans, (800, 70))
+
+            if yellow_hero.count_money < 10:
+                screen.blit(fontImage, (x3, y3))
+            else:
+                screen.blit(fontImage, (x3 - 10, y3))
+            if yellow_hero.health >= 100:
+                screen.blit(fontImage2, (x2, y2))
+            else:
+                screen.blit(fontImage2, (x2 + 20, y2))
+            if yellow_hero.amount_bomb < 10:
+                screen.blit(fontImage5, (x5, y5))
+            else:
+                screen.blit(fontImage5, (x5 - 10, y5))"""
+
+            for event in entities_online_level:
+                screen.blit(event.image, camera_6.apply(event))
+                camera_6.update(yellow_hero)
+
+            player.update(f_left_move, f_right_move, f_up_move, f_damage_mobs)
+            pygame.display.update()
+            time += 1
+
+
+def connect():
+    amount = 0
+
+    while True:
+
+        conn, addr = sock.accept()
+        print('Connected:', addr[0])
+
+        data = conn.recv(2048)
+        if str(data.decode('utf-8')) == 'Yes':
+            amount += 1
+            if amount == 2:
+                conn.send(b'Go')
+                online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, conn)
+            else:
+                conn.send(b'Ok')
+        else:
+            conn.send(b'Notok')
+
+        conn.close()
+
+
+connect()
+pygame.quit()
