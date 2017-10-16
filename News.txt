@@ -47,3 +47,7 @@ Fixed bugs. (01.10.2017)
 -----
 
 Fixed bugs associated with bad work system of scoring. (02.10.2017)
+
+-----
+
+Added a multyplayer mode (Bad working). (16.10.2017)
