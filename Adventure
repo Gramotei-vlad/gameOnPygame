@@ -160,7 +160,18 @@ Anim_door_mid_2 = [("doorClosed_mid.png", 0.1)]
 Anim_door_top_2 = [("doorClosed_top.png", 0.1)]
 Anim_boss_right = [("right.png", 0.1)]
 
-# Музыка и дополнительные мелочи
+# Переменные, определяющие состояние уровней и музыки
+audio_On = True
+level_1_load = False
+level_2_load = False
+level_3_load = False
+level_4_load = False
+level_5_load = False
+crossing_sprung = False
+rock_dead = False
+box_used = False
+
+# Координаты UI элементов
 
 pause_x = 20
 pause_y = 30
@@ -1723,13 +1734,12 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     confirmation = False  # Бомба не установлена!
     stop_game = False  # Игра не остановлена
     download_bomb = 0  # Количество установленных бомб!
+    game_completed = False  # Уровень не пройден.
     time = 0  # Время игры
     time_death = 0  # Время убийства зеленого червя
     time_death_2 = 0  # Время убийства розового червя
     time_death_3 = 0  # Время убийства первой мыши
     time_death_4 = 0  # Время убийства второй мыши
-    global game_completed
-    game_completed = False  # Уровень не пройден.
     dead_player = False  # Игрок не умер
     worm_death = False  # Зеленый червь не умер
     worm_pink_death = False  # Розовый червь не умер
@@ -2286,12 +2296,11 @@ def rungame(f_left_move, f_right_move, f_up_move, f_damage_mobs):
 
 def rungame_level_2(f_left_move, f_right_move, f_up_move, f_damage_mobs, f_go_attack, f_collide_ground, f_return_in_usual):
     level_2 = True  # уровень запущен
-    global game_completed_2
-    game_completed = False # Уровень не пройден
     dead_player = False  # Игрок не умер
     stop_game = False  # Игра не остановлена
     download_bomb = 0  # Нет установленных бомб
     confirmation = False  # Бомба не установлена
+    game_completed = False  # Уровень не пройден.
     time = 0  # Время игры
     bee_in_game = False  # Пчела не прилетела
     key = False  # Ключ не подобран (Я не уверен, что именно для этого)
@@ -2728,7 +2737,6 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     confirmation = False  # Бомба не установлена!
     stop_game = False  # Игра не остановлена
     download_bomb = 0  # Количество установленных бомб!
-    global player_in_water
     player_in_water = False  # Игрок не в воде
     player_stop = False  # Игрок не вываливается за пределы карты (по y)
     crossing_water = False  # Не попал в воду
@@ -2742,7 +2750,6 @@ def rungame_level_3(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     bomb_on_ground = False  # Бомба не на земле
     star_has = False # Звезду не подобрали
     game_completed = False # Уровень не прошли
-    global box_used
     box_used = False # Ящик не использован
     info_time = 0 # Ящик не использован (для времени)
     time = 0  # Время игры
@@ -3457,13 +3464,11 @@ def rungame_level_4(f_left_move, f_right_move, f_up_move, f_damage_mobs):
     download_bomb = 0  # Количество установленных бомб!
     dead_player = False  # Игрок не умер
     game_completed = False  # Уровень не пройден
-    global crossing_sprung
     crossing_sprung = False  # Нет пересечения с пружиной
     crossing_lava = False  # Нет пересечения с блоком лавы
     press_f = False  # Клавиша "F" не нажата
     dialog = 0  # Для отображения текста
     inter_dialog = False  # Игрок не вступил в диалог
-    global rock_dead
     rock_dead = False  # Камень не уничтожен
     end_dialog = 0  # Игрок выполнил задание и читает последнюю фразу
     sprung_in_game = False  # Игрок ещё не приобрел пружину
@@ -4303,10 +4308,6 @@ def online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, sock):
     minus_sign = bytes('-', 'utf-8')
     dog_sign = bytes('@', 'utf-8')
 
-    sock.send(bytes(yellow_hero.health))
-    sock.send(bytes(yellow_hero.rect.x))
-    sock.send(bytes(yellow_hero.rect.y))
-
     if not entities_online_level.has(yellow_hero):
         player.add(yellow_hero)
         entities_online_level.add(player)
@@ -4319,6 +4320,8 @@ def online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, sock):
         except ConnectionResetError:
             server_not_work = True
             menu(server_not_work)
+        """except socket.error:
+            sock.send(no_name + bytes('', 'utf-8') + no_name)"""
         crossing = False  # Нет пересечения с изображением
 
         text_money = (str(yellow_hero.count_money))
@@ -4496,19 +4499,8 @@ def online_level(f_left_move, f_right_move, f_up_move, f_damage_mobs, sock):
 
 def menu(server_not_work):
     lobby = True  # Игрок в меню
-    global audio_On, sock
-    global level_1_load
-    global level_2_load
-    global level_3_load
-    global level_4_load
-    global level_5_load
-    global music_On
     audio_On = True  # Музыка включена
-    level_1_load = False  # Уровень 1 не запущен
-    level_2_load = False  # Уровень 2 не запущен
-    level_3_load = False  # Уровень 3 не запущен
-    level_4_load = False  # Уровень 4 не запущен
-    level_5_load = False  # Уровень 5 не запущен
+    music_On = True  # Прогрывание музыки
     menu_load = False  # Всплывающее меню
     fullScreen = False  # Полноэкранный режим
     shop_load = False  # Магазин не открыт
@@ -4526,6 +4518,7 @@ def menu(server_not_work):
     work_server = True  # Сервер работает
     time_unput = 0  # Время входа в мультиплеер
     confiramtion = False  # Не отослали подтверждение
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     no_name = bytes('b', 'utf-8')
 
     while lobby is True:
@@ -5413,7 +5406,6 @@ def menu(server_not_work):
                 else:
                     sock.send(no_name + bytes('', 'utf-8') + no_name)
                 data = sock.recv(1024)
-                print(data.decode('utf-8'))
                 if str(data.decode('utf-8')) == 'Go':
                     entities_online_level.add(player)
                     entities_online_level.add(blocks)
