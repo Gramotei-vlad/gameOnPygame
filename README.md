@@ -16,6 +16,14 @@ The main game features:
 - Nice graphics;
 - Multiplayer mode (in progress).
 
+To play in the game, you need:
+- Python interpreter 3.x (better 3.5.1);
+- Pygame;
+- PyAnim;
+- Pyglet;
+
+I know, that i can to use CxFreeze in order to gather exe-file. But i am not a masochist.
+
 ![alt text](Screenshots/Screenshot1.png)
 ![alt text](Screenshots/Screenshot2.png)
 ![alt text](Screenshots/Screenshot3.png)
